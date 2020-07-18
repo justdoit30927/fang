@@ -1,0 +1,349 @@
+body{
+    background-color: #FF8C6E;
+}
+/*取消按鈕預設樣式*/
+button{
+    background-color:transparent;
+    border:none;
+    outline: none;
+}
+
+#divContent
+{
+    position: relative;
+    height:500px;
+    perspective: 5000px;
+}
+/*-----------------------------------書-----------------------------*/
+#divBook
+{
+    position: absolute;
+    top:10%;
+    left:40%;
+    width: 450px;
+    height: 600px;
+    
+}
+
+#divBook::before,#divBook::after{
+    content: '';
+    border: 3px solid #000;
+    background-color: #C5C5C5;
+    display: block;
+    position: absolute;
+}
+
+/*下方陰影*/
+#divBook::before
+{
+    width:100%;
+    height: 20px;
+    bottom:-26px;
+    left:8px;
+    transform:skewX(45deg);
+    border-radius: 10%;
+}
+/*右邊陰影*/
+#divBook::after
+{
+    width:20px;
+    height: 100%;
+    top:8px;
+    right:-26px;
+    transform:skewY(45deg);
+    border-radius: 10%;
+}
+/*-----------------------------------書   內頁   定位-----------------------------*/
+#divBook >div{
+    position: absolute;
+    width: 450px;
+    height: 600px;
+    background-color: #ffffff;
+    border:#000000 3px solid;
+    transition:2s;
+    transform-origin: 0% 50%;
+    cursor: pointer;
+}
+/*
+.open{
+    animation-name: flip;
+    animation-fill-mode: forwards;
+    animation-duration: 2s;
+}*/
+.letterBackground{
+    background-image: url("./img/letter.jpg");
+    background-size:100% 100%;
+}
+
+/*--------------------------------封面---------------------------------------*/
+/**幫內頁加上Z-index**/
+#divFrontCover{
+    z-index: 99;
+    text-align: center;
+}
+#divFrontCoverTitle{
+    width:100%;
+    height:60%;
+    margin-top:100px; 
+    font-family:monospace;
+    font-size:35px;
+    Line-height:70px;
+}
+/*提醒怎麼打開書*/
+#remind{
+    animation-name:flashRemind;
+    animation-duration: 1s;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+#divFrontCover:hover #remind{
+    display:block;
+}
+@keyframes flashRemind{
+    to{
+        color:black;
+    }
+    from{
+        color:white;
+    }
+}
+
+/*---------------------------------信-------------------------------------------*/
+.letterTitle{
+    height:5%;
+    width:100%;
+    box-sizing: border-box;
+    padding:20px;
+    font-family:cursive;
+    font-weight: bold;
+    font-size:30px;
+}
+.letterContent{
+    height:85%;
+    width:100%;
+    box-sizing: border-box;
+    padding:30px;
+    font-family:cursive;
+    font-size:17px;
+    text-indent:20px;
+}
+
+.currentPage{
+    text-align: center;
+    font-size: 20px;
+}
+/*-----------------------------  翻頁   ----------------------------------*/
+
+/*翻開封面*/
+.flipFrontCover{
+    display: block;
+    z-index: 99;
+    animation-name: flipFrontCover;
+    animation-fill-mode: forwards;
+    animation-duration: 1s;
+}
+/*翻到下一頁動畫*/
+.flipToNextPage,.flipToPrePage{
+    display: block;
+    z-index: 99;
+    animation-name: flip;
+    animation-fill-mode: forwards;
+    animation-duration: 1s;
+}
+/*翻到前一頁動畫*/
+.flipToPrePage{
+    animation-direction: reverse;
+}
+/*翻封面動畫*/
+@keyframes flipFrontCover{
+    0%{
+        transform: rotateY(0deg);
+    }
+    50%{
+        transform: rotateY(-160deg);
+        background-image: url("./img/letter.jpg");
+        background-size:100% 100%;
+    }
+    100%{
+        transform: rotateY(-180deg);
+        background-image: url("./img/letter.jpg");
+        background-size:100% 100%;
+    }
+}
+
+/*翻頁動畫*/
+@keyframes flip{
+    0%{
+        transform: rotateY(0deg);
+    }
+    50%{
+        transform: rotateY(-160deg);
+    }
+    100%{
+        transform: rotateY(-180deg);
+        
+    }
+}
+
+/*-----------------------------------換頁用的按鈕 -------------------------*/
+/*換頁按鈕*/
+#divChangeButton{
+    position: absolute;
+    top:90%;
+    left:50%;
+}
+
+
+
+
+
+
+
+
+
+
+/**-------------------------------------歌單start-----------------------------------------------**/
+/*清單*/
+#playList{
+    position: relative;
+    width:250px;
+    height: 100%;
+    overflow: visible;
+}
+
+#playList_leftSide{
+    width: 100%;
+    height: 100%;    
+    border:  #000 3px solid;
+    background-color: #fff;
+}
+/**左邊清單**/
+.playList_MainList{
+    font-size: 20px;
+    font-weight: bold;
+    padding:5px;
+    border-bottom:#000 2px solid;
+}
+.playList_SubList{
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 15px;
+    padding:10px 0px;
+}
+.playList_SubList  div{
+    padding:5px 0px 5px 10px;
+    cursor: pointer;
+}
+.playList_SubList  div:hover{
+    background-color: #c7c3c3;
+}
+.playList_SubList  a
+{
+    color:black;    
+    text-decoration:none;
+}
+
+/*--------------------------世界地圖------------------------------*/
+/*世界地圖本體*/
+#divWorldMap{
+    height: 500px;
+    width:800px;
+    border:#ffffff 10px solid;
+    margin-top:-270px;
+    margin-left:-410px;
+    background:black;
+    position: fixed;top:50%; left:50%;
+    background-image: url(./img/worldremove.png);
+    background-repeat:no-repeat;
+    background-position: center;
+    background-size: 800px;
+}
+/**世界地圖popup的叉叉**/
+#divCloseWorldMap{
+    position: absolute;
+    top:-20px;
+    right:-20px;
+    cursor: pointer;
+    color: #000;
+    background: #fff;
+    border-radius: 50%;
+}
+/**地圖 國家紅點的定位**/
+#America{
+    top:230px;
+    left:160px;
+}
+#South_America{
+    top:330px;
+    left:260px;
+}
+#Africa{
+    top:290px;
+    left:420px;
+}
+#Europe{
+    top:190px;
+    left:400px;
+}
+#Central_Asia{
+    top:230px;
+    left:490px;
+}
+#Korea{
+    top:220px;
+    left:635px;
+}
+#Japan{
+    top:220px;
+    left:660px;
+}
+#Australia{
+    top:370px;
+    left:650px;
+}
+#New_Zealand{
+    top:415px;
+    left:725px;
+}
+
+/*國家碰觸紅點    出現名稱*/
+#America::after,#South_America::after,#Europe::after
+{
+    position: absolute;
+    top:-20px;
+    left:10px;
+    padding: 0px 5px;
+    border:#000 2px solid;
+    white-space:nowrap;
+    color:#000;
+    text-decoration: none;
+    background:#fff;
+}
+#America:hover::after{
+    content: '北美';
+}
+#South_America:hover::after{
+    content: '南美洲';
+}
+#Europe:hover::after{
+    content: '歐洲';
+}
+
+/**世界地圖的紅點**/
+.divWorldMap-redPoint{
+    position: absolute;
+    border-radius:50%;
+    background-color: red;
+    height: 10px;
+    width:10px;
+}
+.divWorldMap-redPoint:hover
+{
+    background-color:#be0000;
+    height: 12px;
+    width:12px; 
+}
+
+
+
+
+

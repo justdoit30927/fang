@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="./Jquery/jquery-3.4.1.js"></script>
+    <script src="./Vue/vue.js"></script>
+    <link rel=stylesheet type="text/css" href="Book.css">
+    <link rel=stylesheet type="text/css" href="./fontawesome/css/all.css">
+    <!-- 燈箱插件 -->
+    <script src="lightbox/js/lightbox-plus-jquery.min.js"></script>
+    <link rel="stylesheet" href="lightbox/css/lightbox.min.css">
+    
+    <script>
+        $(document).ready(function(){
+            var app = new Vue({
+                el:"#divContent",
+                data:{
+                    currentYear:2020,
+                    isOpen:false,
+                    nowPage: 0,
+                    flipToPrePage:false,
+                    flipToNextPage:false,
+                    flipAnimationType:"",
+                    timer:0,
+                    pages:[
+                    {
+                        year:2020,
+                        title:"2020.05.19",
+                        contentText:"<div><strong>芳儀祝妳生日快樂</strong></div>"
+                                    +"<div>原本這份禮物是打算生日那天送給妳的，沒想到最後會被改成道別禮物。</div>" 
+                                    +"<br/>"
+                                    +"<div><strong>請注意安全!!</strong></div>"
+                                    +"<div>工作認真很好，但太晚回家真的很危險，妳家那巷子很暗、人也比較稀少。</div>"
+                                    +"<div><strong>有正常吃飯嗎？</strong></div>"
+                                    +"<div>工作再忙還是要正常吃飯，再多的錢都買不回健康的身體。喜歡吃速食、手搖飲，還是要控制一下，那對身體真的不太好。</div>"
+                                    +"<div><strong>工作還順利嗎？</strong></div>"
+                                    +"<div>如果妳真的覺得不好，換工作並不草莓。</div>"
+                                    +"<div>但如果明明覺得不好，卻沒有勇氣離開，這才不健康。以妳的工作態度，去哪都會成功的。</div>"
+                                    +"<br/>"
+                                    +"<div>這些我以前都說過了，我是真的覺得很重要</div>"
+                                    +"<div>但妳從來都聽不進去</div>"
+                                    +"<div>也許是我從一開始再妳心中就沒有任何分量，才沒用吧</div>"
+                                    +"<br/>"
+                                    +"<strong>使用教學：</strong>點右邊頁會翻下頁，點左邊頁會翻到上頁",
+                        show:false,
+                    },
+                    {
+                        year:2020,
+                        title:"",
+                        contentText:"<div>妳當初出過要讓我感覺到痛、感覺到難過。</div>"
+                                    +"<div>恭喜妳成功了</div>"
+                                    +"<div>這是我長大後第一次哭，但這也是<strong>最後一次因為妳而哭</strong>。</div>"
+                                    +"<br/>"
+                                    +"<div>我知道妳根本不在意</div>"
+                                    +"<div>妳只想要我當一個稱職的工具人，要我來就來、要我走就走</div>"
+                                    +"<br/>"
+                                    +"<div>不能再妳不需要時，對妳好</div>"
+                                    +"<div>不能表達出對妳的關心</div>"
+                                    +"<div>不能讓妳覺得有壓力</div>"
+                                    +"<div>我做不到妳的要求，所以妳轉身離開了。</div>"                                    
+                                    +"<br/>"
+                                    +"<div>我只是想要真物</div>"
+                                    +"<div>但妳只想要偽裝過後，聽話的那個我</div>"
+                                    +"<div>我的真實的感受根本不重要，妳只會覺得困擾</div>" 
+                                    +"<div>(也許那就是妳想要的吧，一個演得很好的渣男)</div>"             
+                                    +"<br/>"
+                                    +"<div>我恨自己傻才會記得妳說的每一句話，為妳擔心</div>"
+                                    +"<div>我恨自己沒辦法融化妳的心</div>"  
+                                    +"<div>我恨自己竟然付出真心去相信妳，還以為妳就是我一直在尋找，能陪我一輩子的真物。</div>"
+                                    +"<br/>",
+                        show:false,
+                    },
+                    {
+                        year:2020,
+                        title:"",
+                        contentText:"<div>有一堆問題想問</div>"
+                                    +"<div>但我知道妳是不會正面給我回答的。</div>" 
+                                    +"<br/>"
+                                    +"<div>我也知道我是從，妳說：「不希望我做超過朋友之間關心的行為」後，開始做錯的。</div>"
+                                    +"<br/>"
+                                    +"<div>應該給妳多點空間</div>"
+                                    +"<div>但我怕自己會失去陪在妳身邊的權利 (我第一次遇到不知道怎麼做才對)</div>"
+                                    +"<div>現在看來，妳從一開始就沒打算給我這個權利吧</div>"
+                                    +"<div>不管我怎麼做，最多都只能當朋友，現在連朋友都當不成了 ㄏ。</div>"
+                                    +"<br/>"
+                                    +"<div>明明一開始的時候，妳不高興都會直接告訴我</div>"
+                                    +"<div>我也知道自己缺點很多，也都盡力再改了。</div>"
+                                    +"<div>也許妳也沒感覺到，但我都記得。</div>"
+                                    +"<br/>"
+                                    +"<div>但後來我想找妳談談，但妳連說都不願意說</div>"
+                                    +"<div>當最後妳願意說時，我連說挽回的機會都沒有。想說出我的感受妳都不願意聽。</div>"
+                                    +"<br/>"
+                                    +"<div><strong>這也難怪，妳都跑去跟其他男生說了，哪需要我。最後謎底揭曉時，我這段時間的行為真可悲ㄏ</strong></div>",
+                        show:false,
+                    },
+                    {
+                        year:2020,
+                        title:"",
+                        contentText:"<div>明知道妳對我很無情、明知道妳只是把我當成備胎(也許連備胎都排不上)、明知道妳不值得我對妳好。</div>"
+                                    +"<div>但我還是時常想起妳，會擔心妳，怕妳被騙。</div>"
+                                    +"<div>(很煩，我討厭明明很受傷卻還這樣的自己)</div>"
+                                    +"<br/>"                                 
+                                    +"<div>對妳來說這可能是一段，不重要、不值得珍惜的緣分。隨時都可以拋棄的回憶</div>"  
+                                    +"<div>跟妳不一樣，我很認真的對待這段緣份，<strong>我做不到</strong>。</div>"                                 
+                                    +"<div><strong>我的心很小一次只能有一個人。這個人要進去很難，但要出去更難。</strong></div>"
+                                    +"<br/>"
+                                    +"<div><strong>但這都不重要了，既然妳最後的願望是希望我離開，我會離開的。只要妳開心就好，但請再給我點時間忘了妳。</strong></div>"
+                                    +"<br/>"
+                                    +"<div>不用再麻煩孟霈回答了。</div>"
+                                    +"<div>雖然我一定會繼續難過、後悔，也會想知道妳過得好不好、想跟妳說話。或是希望妳再給我第二次機會，但都這不關妳的事。</div>"
+                                    +"<br/>"
+                                    +"<div>我會從妳的人生中離開的。</div>"
+                                    +"<div>祝妳幸福。</div>"
+                                    +"<br/>",
+                        show:false,
+                    },
+                    {
+                        year:2021,
+                        title:"2021.05.19",
+                        contentText:"<div>好久不見，祝芳儀生日快樂，這是2021份的祝福。</div>"
+                                    +"<div>我想未來應該不會再遇到跟我同一天生日的人了吧，所以多做了幾年。</div>"
+                                    +"<br/>"
+                                    +"<div>(以下為隱藏訊息，2021年才會開啟)</div>",
+                        hiddenText:"待續中",
+                        show:false,
+                    },
+                    {
+                        year:2022,
+                        title:"2022.05.19",
+                        contentText:"想不到已經過了三年了"
+                                    +"<div>祝妳25歲生日快樂</div>"
+                                    +"</br>"
+                                    +"<div>這時候妳還在台北打拼嗎？</div>"
+                                    +"<div>有好好吃飯嗎？</div>"
+                                    +"<div>跟男朋友還好嗎？(算了我不想知道)</div>"
+                                    +"<br/>"
+                                    +"<div>有好多好多的問題想親口問妳？</div>"
+                                    +"<div>但不知道這時候我在哪</div>",
+                        show:false,
+                    },
+                    {
+                        year:2023,
+                        title:"2023.05.19",
+                        contentText:"<div>妳最近好嗎芳儀？</div>"
+                                    +"<div>生日快樂!!這是最後一年了。</div>"
+                                    +"<br/>"
+                                    +"<div>26歲的生活是怎麼樣呢？很辛苦嗎、很疲憊嗎 又或者很幸福。</div>"
+                                    +"<div>人生不如意十之八九，後悔的事也是不停地發生"
+                                    +"，但也會有讓人開心的事。</div>"
+                                    +"<div>希望妳能保持一顆快樂的心，渡過接下來的每一天。(笑一個 嘻)</div>"
+                                    +"<div>愛笑的女孩兒運氣不會差。</div>"
+                                    +"<div>祝妳能順利找到，值得讓妳付出熱情的目標。</div>",
+                        show:false,
+                    },
+                    ],
+                },
+                methods:{
+                    //封面開關狀態
+                    openBook:function(){
+                        if(this.isOpen){
+                            this.flipPage("pre");
+                        }
+                        else{
+                            this.isOpen = true;
+                            //把開啟後把內容清空，不清空會看到反過來的字
+                            $("#divFrontCover").html("");
+                        }                        
+                    },
+                    //翻頁
+                    flipPage:function(flipAnimation_Type){
+                        this.flipAnimationType = flipAnimation_Type;
+                        //檢查能不能翻頁
+                        if(this.checkIsFlip()){                            
+                            //翻頁動畫
+                            this.flipAnimation(this.flipAnimationType);
+                        };
+                    },
+                    //檢查能不能翻頁
+                    checkIsFlip:function(){
+                        if(this.flipAnimationType=="pre"){
+                            if(this.nowPage-1 == -1){
+                                alert("已經是第一頁了"); 
+                                return false;                           
+                            }
+                        }
+                        else{
+                            if(this.nowPage+1 == this.pages.length){
+                                alert("已經是最後一頁了");
+                                return false;
+                            }
+                        }
+                        return true;
+                    },
+                    //翻頁動畫
+                    flipAnimation:function(){
+                        //翻上一頁
+                        if(this.flipAnimationType=="pre"){
+                            this.flipToPrePage = true;
+                        }
+                        //翻下一頁
+                        else{
+                            this.flipToNextPage = true;
+                        }
+                        //下一頁要在翻頁前變更內容
+                        if(this.flipAnimationType =="next"){
+                            this.changeLetter();
+                        }
+                        
+                        //設定計時器取消  翻頁動畫
+                        this.timer = setTimeout(this.cancel,1000);
+                        
+                    },
+                    cancel:function(){
+                        this.flipToPrePage=false;
+                        this.flipToNextPage=false;
+                        clearTimeout(this.timer);
+                        //上一頁要在翻頁後變更內容
+                        if(this.flipAnimationType =="pre"){
+                            this.changeLetter();
+                        }
+                    },
+                    changeLetter:function(){
+                        //隱藏現在這頁
+                        this.pages[this.nowPage].show = false;  
+                        if(this.flipAnimationType=="pre"){
+                            this.nowPage --;
+                        }
+                        else{
+                            this.nowPage ++;
+                        }                                              
+                        //顯示翻頁後的內容
+                        this.pages[this.nowPage].show = true;
+                    },
+                    //按下功能的世界地圖能開啟世界地圖
+                    changeWorldMapState:function(){
+                        app2.showWorldMap = true;
+                    }
+                },
+                computed:{},
+                watch:{
+                }
+
+            })
+            //初始化要開啟哪一頁
+            var date = new Date();
+            var myYear = date.getFullYear();
+            var myPage = "2020";
+            switch(myYear){
+                case 2020:
+                    myPage = 0;
+                    break;
+                case 2021:
+                    myPage = 4;
+                    break;
+                case 2022:
+                    myPage = 5;
+                    break;
+                case 2023:
+                    myPage = 6;
+                    break;
+            }
+            app.nowPage = myPage;
+
+            app.pages[app.nowPage].show = true;
+            app.currentYear = date.getFullYear();//現在哪一年
+            
+            
+            
+        })
+        
+    </script>
+</head>
+<body>
+    <div id="divContent">
+        <!--書-->
+        <div id="divBook">
+            <!--封面-->
+            <div id="divFrontCover" :class="{'flipFrontCover':isOpen}" @click="openBook();"> 
+                <div id="divFrontCoverTitle">
+                    芳儀の<br/>Farewell Present
+                </div>
+                <div id="remind">請點擊書的封面，開啟</div>
+            </div>
+            <!--內頁-->
+            <div class="letterBackground" v-for="page in pages" v-show="page.show" @click="flipPage('next')">
+                <!--日期-->
+                <div class="letterTitle">
+                    {{page.title}}
+                </div>
+                <!--信件內容-->
+                <div class="letterContent">
+                    <span v-html="page.contentText"></span>
+                    <!--隱藏內容-->
+                    <span v-if="currentYear >= page.year" v-html="page.hiddenText"></span>
+                </div>
+                <!--目前頁數-->
+                <div class="currentPage">
+                    {{nowPage+1}} / {{pages.length}}
+                </div>
+            </div>
+            <!--翻頁動畫用的頁面-->
+            <div class="letterBackground" hidden :class="{'flipToNextPage':flipToNextPage,'flipToPrePage':flipToPrePage}">
+            </div>
+        </div>
+    </div>
+</body>
+</html>
