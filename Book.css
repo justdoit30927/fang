@@ -20,7 +20,7 @@ button{
     position: absolute;
     top:10%;
     left:40%;
-    width: 450px;
+    width: 480px;
     height: 600px;
     
 }
@@ -56,7 +56,7 @@ button{
 /*-----------------------------------書   內頁   定位-----------------------------*/
 #divBook >div{
     position: absolute;
-    width: 450px;
+    width: 480px;
     height: 600px;
     background-color: #ffffff;
     border:#000000 3px solid;
