@@ -240,9 +240,11 @@
         //登入時間
         var myDate = new Date();
         var myTime = myDate.toString();
-            db.ref("DB01/EnterTime/").push({
+        if(location.href.indexOf("http") > -1 && cvUserName!="John"){
+            db.ref("/EnterTime").push({
                 EnterTime: myTime                   
             })
+        }
         /* 取參數 */
         function findGetParameter(parameterName) {
             var result = null,
