@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!--JS-->
+    <script src="../Jquery/jquery-3.4.1.js"></script>
+    <script src="../Jquery/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
+    <script src="../Vue/vue.js"></script>  
+    <script type="text/javascript" src="https://www.gstatic.com/firebasejs/6.5.0/firebase.js"></script>
+    <!--CSS-->
+    <!--<script src="../Jquery/jquery-ui-1.12.1.custom/jquery-ui.min.css"></script>-->
+    <link rel=stylesheet type="text/css" href="./TestBirthday.css">
+    <link rel=stylesheet type="text/css" href="./fontawesome/css/all.css">
+    <script>
+        var vm;
+        var cvUser="";
+
+        // /*設定*/
+        /*設定*/
+        const firebaseConfig = {
+            apiKey: "AIzaSyAiNI5HBqlIypW1FL2ski1wl7KlXvMN13o",
+            authDomain: "fydb-1eb45.firebaseapp.com",
+            databaseURL: "https://fydb-1eb45-default-rtdb.firebaseio.com",
+            projectId: "fydb-1eb45",
+            storageBucket: "fydb-1eb45.appspot.com",
+            messagingSenderId: "1036728452964",
+            appId: "1:1036728452964:web:57094b4af2adaea5969c71",
+            measurementId: "G-67ER8EYM3H"
+        };
+        firebase.initializeApp(firebaseConfig);
+        // //
+        var db = firebase.database()
+        db.ref("/DB01/ChatLog/").on('value',function(snapshot){
+             vm.$refs["Line_App"].ChatLog = snapshot.val();
+        })
+
+         db.ref("/DB01/ChatLog/").push({
+             UserId:"cvUserId",
+             Text:"123456"
+             // UserName:vm3.myUserName,
+             // UserChar:vm3.myUserChar,
+             // UserSpeak:this.myInput    
+         })
+
+
+        $(document).ready(function(){
+            
+
+            vm = new Vue({
+                el:"#VueArea",
+                data:{
+                    clickNow:true,
+                    clickY:0,
+                    time:new Date(),
+                    message:"您有一則新訊息",
+                    messageShowMark:false,
+                    ChatLog:"",
+                },
+                methods:{
+                    GetTime:function(){
+                        this.time = new Date();
+                    },
+                    showMessage:function(){
+                        console.log("456");
+                        this.messageShowMark = true;
+                    },
+                    ScreenSlip:function(event){
+                        console.log("事件");
+                        console.log("event：" + event.offsetY);
+
+                        this.clickY = event.clientY
+                        this.clickNow = true;
+                    },
+                    ScreenMove:function(event){
+                        if(this.clickNow === true){
+                            if(event.clientY - this.clickY < 0 ){
+                                $("#ScreenProtect").css("top",event.clientY - this.clickY + "px");
+                            }
+
+                            if( -parseInt($("#ScreenProtect").css("top"),10) > parseInt($("#ScreenProtect").css("height"),10)/2 ){
+                                $("#ScreenProtect").css("top", -parseInt($("#ScreenProtect").css("height"),10));
+
+                            }
+
+                        }
+
+                        
+                    },
+                    ScreenOrigin:function(){
+                        this.clickY = 0;
+                        this.clickNow = false;
+                    },
+                    /*移動到特定頁面*/
+                    MoveTo: function(_Target){
+                        
+                    }
+                },
+                watch:{
+                    time:function(){
+                        // console.log(this.time.getFullYear() + "年"); 
+                        // console.log(this.time.getMonth()+1 + "月"); 
+                        // console.log(this.time.getDate() + "日"); 
+                        // console.log(this.time.getHours() + "時"); 
+                        // console.log(this.time.getMinutes() + "分"); 
+                    }
+                },
+                mounted:function(){
+                    setTimeout(this.showMessage, 2000);//過兩秒出現訊息
+                },
+                created:function(){
+                    //取得現在時間
+                    setInterval(this.GetTime,1000);
+                }
+
+            })
+        })
+
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        function myDarg(event){
+            console.log("ID：" + event.target.id);
+            event.dataTransfer.setData("Text", event.target.id);
+        }
+        function drop(ev) {
+            var data = ev.dataTransfer.getData("Text");
+            ev.target.appendChild(document.getElementById(data));
+            ev.preventDefault();
+        }
+
+        function dropNew(event){
+            var myIndex = $(event.target).index();
+            event.dataTransfer.setData("Text", myIndex);
+        }
+
+        function dropedNew(event){
+            var oldIndex = event.dataTransfer.getData("Text");
+            var newIndex = $(event.target).index();
+
+            var myElement = $(event.target).parent().children().eq(oldIndex)[0];
+
+            if(oldIndex > newIndex){
+                event.target.before(myElement);
+            }
+            else{
+                event.target.after(myElement);
+            }
+        }
+
+
+    </script>
+<head>
+<body>
+    <!--Vue 區塊-->
+    <div id="VueArea">
+        <!--手機主體-->
+        <div id="Iphone">
+            <!--手機 螢幕-->
+            <div id="Monitor">
+                <!--螢幕保護程式-->
+                <div id="ScreenProtect" @mousedown="ScreenSlip" @mouseup="ScreenOrigin" @mousemove="ScreenMove" style="z-index:50; display: block;">
+                    <div class="time">
+                        {{time}}
+                    </div>
+                    <div>
+                        <div class="newMessage" v-show="messageShowMark">
+                            {{message}}
+                        </div>
+                    </div>
+                    <div class="twinkle">
+                        按下主畫面按鈕來解鎖
+                    </div>
+                </div>
+                <!--首頁-->
+                <div>
+                    <!-- <div class="app" ondragover="allowDrop(event)" ondrop="drop(event)">
+                        <div id="1" draggable="true"  ondragstart="myDarg(event)" style="background-color: blue;">
+                            <img src="Img/01.jpg" style="top: 10px; height: 5px; width: 5px;"/>
+                        </div>
+                    </div> -->
+                    <div id="1"  class="app" draggable="true"  ondragstart="dropNew(event)" style="background-image: url('Img/01.jpg');">
+                        <img src="Img/01.jpg" style="top: 10px; height: 5px; width: 5px;"/>
+                    </div>
+                    <div class="app"></div>
+                    <div class="app"></div>
+                    <div class="app"></div>
+                    <div class="app"></div>
+                    <div class="app"></div>
+                    <div class="app" ondragover="allowDrop(event)" ondrop="dropedNew(event)"></div>
+                    <div class="app" ondragover="allowDrop(event)" ondrop="drop(event)">
+                    </div>
+                </div>
+                <!--Line-->
+                <!-- <div>
+
+                </div> -->
+
+                <!--相本-->
+                <line-app-component ref="Line_App"></line-app-component>
+
+
+                <!-- <div>
+                    
+                </div> -->
+                <photo-component></photo-component>
+
+                <test-component></test-component>
+
+            </div>
+            <!--手機下方邊框-->
+            <div id="BottomFrame">
+                <!--Home鍵-->
+                <div id="HomeBtn" @Click="MoveTo('Home')"></div>
+            </div>
+        </div>        
+    </div>
+</body>
+</html>
+
+<script>
+    /*******  App start ************/
+    /*Line*/
+    Vue.component("line-app-component",{
+        template: "#line_app_template",
+        props:[],
+        data:function(){
+            return{
+                ChatLog:"",
+                New:[],
+                RightText:false,
+            }
+        },
+        methods:{
+            /*更新對話內容*/
+            UpdateConversationContent:function(){
+                
+            },
+            getChatLog:function(){
+                var myComponent = this;
+                var myNew = Object.keys(this.ChatLog).map(function(item,index){
+                    return myComponent.ChatLog[item];
+                })
+                this.myNew = myNew;
+            },
+            MySpeak:function(_User){
+                if(_User === cvUser){
+                    return true;
+                }
+                else{
+                    return false;
+                }
+            }
+        },
+        updated:function(){
+            //拉到最下方
+            var myScrollHeight = $('#ConversationContent')[0].scrollHeight;
+            $("#ConversationContent").scrollTop(myScrollHeight);
+        },
+        mounted:function(){
+            this.getChatLog();
+            
+        }
+    })
+    /*相片*/
+    Vue.component("photo-component",{
+        template: "#photo_template",
+        props:[],
+        data:function(){
+            return {
+                PhotoIndex:6,
+            }
+        },
+        methods:{
+            PreviousPhoto:function(){
+                if(this.PhotoIndex === 0){
+                    this.PhotoIndex = 10;
+                }
+                else{
+                    this.PhotoIndex --;
+                }
+            },
+            NextPhoto:function(){
+                if(this.PhotoIndex === 10){
+                    this.PhotoIndex = 0;
+                }
+                else{
+                    this.PhotoIndex ++;
+                }
+            }
+        },
+        mounted:function(){
+
+        }
+    })
+    /*視訊*/
+    Vue.component("test-component",{
+        template:"#Test_Component",
+        data:function(){
+            return{
+
+            }
+        },
+        methods:{
+            TakePhoto:function(){
+                var video = $("#myVideo")[0];
+                var canvas = this.capture2(video);
+                var imgData = canvas.toDataURL("image/jpg");
+                $("#myImg").attr("src",imgData);
+                //window.URL.createObjectURL(mytest);
+                //Google Chrome要用webkitGetUserMedia函式
+                //navigator.webkitGetUserMedia("video", success);  //顯示影像
+            },
+            success:function(stream) {
+                $("#myVideo").attr("src", window.webkitURL.createObjectURL(stream));
+            },
+            capture:function(){
+                var context = canvas.getContext("2d");
+                var myVideo = $("#myVideo")[0];
+                context.drawImage(myVideo,0,0,480,320);
+            },
+            //
+            capture2:function(video){
+                var canvas = document.createElement('canvas'); //建立canvas js DOM元素
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                var ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0);
+                return canvas;
+            }
+        },
+        mounted:function(){
+            // 定義要取得的影音內容，包含影像和聲音
+            var constraints = {
+                audio: true,
+                video: {
+                    facingMode: "user"  //開前鏡頭
+                }
+                // video: true
+                
+            }
+            navigator.mediaDevices.getUserMedia(constraints).then(function(stream){
+                //var myURL = URL.createObjectURL(stream);
+
+                let inputVideo = document.querySelector('#myVideo');
+                //inputVideo.src = myURL;
+
+                inputVideo.srcObject = stream;
+                inputVideo.play();
+            })
+            
+        }
+    })
+
+    /*自爆APP*/
+
+    /*其他*/
+    Vue.component("other-component",{
+        template: "",
+        props:[],
+        data:function(){
+            
+        },
+        methods:{
+            
+        },
+    })
+
+    /*******  App end ************/
+</script>
+
+<template id="line_app_template"> 
+    <div class="line">
+        <div id="ConversationContent">
+            <div v-for="item in ChatLog" :class="{TextRow:true,MyTextRow:MySpeak(item.User)}">
+                <div :class="{TextFrame:true,MyTextFrame:MySpeak(item.User)}">
+                    {{item.Text}}
+                </div>
+            </div>
+        </div>
+        <div class="inputArea">
+            <textarea row="2" cols="20"></textarea>
+        </div>
+    </div>
+</template>
+
+
+<template id="photo_template">
+    <div class="photo">
+        <!-- 大圖 -->
+        <div id="fake" style="display:flex; justify-content:center;align-items:center;">
+            <div id="left" @click="PreviousPhoto"></div>
+            <img :src="'./Img/dog' + PhotoIndex + '.jpg'" style="width: 100%;">
+            <!-- ./Img/06.jpg -->
+            <div id="right" @click="NextPhoto"></div>
+        </div>
+        <!-- 小圖 -->
+        <div>
+            
+        </div>
+        <!-- 功能 -->
+        <div>
+            
+        </div>
+    </div>
+</template>
+
+
+<template id="Test_Component">
+    <div>
+        123
+        <video id="myVideo" src="123" style="width: 100%; height: 100%;"></video>
+        <input type="button" value="take photo" @click="TakePhoto">
+
+        <!--拍照按鈕-->
+        <div>
+            <button id="capture" @click="capture">拍照</button>
+        </div>
+        <!--描繪video截圖-->
+        <canvas id="canvas" width="480" height="320"></canvas>
+        <img src="" id="myImg"/>
+    </div>
+</template>
+
+

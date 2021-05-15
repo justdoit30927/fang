@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="../Jquery/jquery-3.4.1.js"></script>
+    <script src="../Vue/vue.js"></script>
+    <link rel=stylesheet type="text/css" href="./fontawesome/css/all.css">
+    <style>
+        /* 進度條樣式 */
+        input[type="range"]{
+            appearance: none; /* 使用系統預設的外觀 */
+            -webkit-appearance: none;
+            outline:none;
+            margin:0px;
+        }
+        input[type="range"]::-webkit-slider-runnable-track{
+            background-color: #615f5f; /* 背後*/
+            overflow: hidden;
+        }
+
+        input[type="range"]::-webkit-slider-thumb{
+            -webkit-appearance: none;
+            width:2px;
+            height: 3px;
+            background-color: #69eaab;
+            box-shadow: -100vw 0 0 100vw #69eaab;
+        }
+
+
+        /*全屏設定，此設定很好用*/
+        html, body{
+            height: 100%;
+            background-color: #6495ed;
+        }
+        #VueArea{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction:column;
+            height: 100%;
+        }
+
+
+
+        /*切版*/
+
+        .music-app{
+            position: relative;
+            height: 90%;
+            width: 30%;
+            min-width: 300px;
+        }
+
+        .music-app > div:nth-child(1){
+            height: 45%;
+        }
+        .music-app > div:nth-child(2){
+            height: 45%;
+        }
+        .music-app > div:nth-child(3){
+            height: 10%;
+        }
+        /* 專輯大圖 */
+        .album-cover-area{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        /* 專輯清單 */
+
+        /* 音樂撥放器 */
+        .album-player-area > div:nth-child(1){
+            height: 20%;
+        }
+        .album-player-area > div:nth-child(2){
+            height: 80%;
+        }
+
+        /************ 樣式 ********************/
+        .music-app{
+            background-color: #000000;
+            color:#ffffff;
+        }
+        /* 專輯大圖 */
+        .album-cover-area{
+            overflow: hidden;
+            /* border-bottom: 2px solid white; */
+            background: linear-gradient(#2b712b,#000000);
+        }
+        .big-album-cover{
+            width: 60%;
+            max-width: 180px;
+        }
+        /* 專輯清單 */
+        .album-list-area{
+            overflow-y: auto;
+            /* border-bottom: 2px solid white; */
+        }
+        .album-information{
+            background-color: #000000;
+            box-sizing: border-box;
+            display: flex;
+            align-items:center;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        .album-information:hover{
+            background-color: #b5966e;
+        }
+        .album-information > div:nth-child(1){
+            width: 20%;
+        }
+        /* 小技巧：靠圖片撐開整個div */
+        .album-information > div:nth-child(1) > img{
+            float: left;/* 為了讓div 可以自己適應 圖片高度 */
+            width: 100%;
+        }
+
+        .album-information > div:nth-child(2){
+            width: 60%;
+            padding: 0px 0px 0px 5px;
+        }
+        .album-information > div:nth-child(3){
+            width: 20%;
+            text-align: center;
+        }
+        /* 播放中的歌 */
+        .song-highlight{
+            /* background-color: burlywood; */
+            background-color: #674a25;
+        }
+
+
+
+
+        /* 進度條 */
+        .progress-bar{
+            cursor: pointer;
+            width: 100%;
+        }
+        /* 播放器 */
+        .music-player{
+            background-color: #504e4e;
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+        .music-player > div{
+            box-sizing: border-box;
+        }
+        /* 歌曲資訊 */
+        .music-player > div:nth-child(1){
+            width: 55%;
+            text-align: center;
+            font-size: 8px;
+        }
+        /* 播放時間 */
+        .music-player > div:nth-child(2){
+            width: 15%;
+            font-size: 8px;
+        }
+        /* 播放器工具 */
+        .music-player > div:nth-child(3){
+            width: 30%;
+            display: flex;
+            justify-content:space-around;
+        }
+        .music-player > div:nth-child(3) > span{
+            cursor: pointer;
+        }
+
+
+    </style>
+    <script>
+        var vm;
+        var myAudio = new Audio();
+        $(document).ready(function(){
+            vm = new Vue({
+                el:"#VueArea",
+                data:{
+                    currentSongInformation:"",  //目前這首個的資訊
+                    currentSongIndex: 0,        //現在在撥哪首歌
+                    currentSeconds:0,           //目前歌撥放時間  (進度條要使用)
+                    playingMark:false,          //撥放記號  true:撥放中    false:暫停
+                    timer:"",                   //計時器   (計算目前這首歌撥了多久)
+                    songList:[                  //歌單
+                        {
+                        id:0,
+                        title:"You've Got a Friend in Me",  //歌名
+                        singer:"Randy Newman",  //演出者
+                        albumCoverPath:"./Img/Youve_Got_a_Friend_in_Me.jpg",    //專輯封面
+                        filePath:"./Music/Youve_Got_a_Friend_in_Me.mp3",    //.mp3 路徑
+                        time:"02:08",   //總時間 (分：秒)
+                        totalSeconds:"128", //總秒數
+                        likeMark:true   //喜歡記號
+                        },
+                        {
+                        id:1,
+                        title:"Tomorrow tonight",
+                        singer:"Lootes",
+                        albumCoverPath:"./Img/Tomorrow_tonight.jpg",
+                        filePath:"./Music/Tomorrow_tonight.mp3",
+                        time:"03:23",
+                        totalSeconds:"203",
+                        likeMark:true
+                        },
+                    ]
+                },
+                computed:{
+                    //把 秒 轉換成  分：秒
+                    parseMintue:function(){
+                        var myMinute = parseInt(this.currentSeconds/60);
+                        var mySecond = this.currentSeconds%60;
+                        if (myMinute / 10 < 1) {
+                            myMinute = "0" + myMinute;
+                        }
+                        if (mySecond / 10 < 1) {
+                            mySecond = "0" + mySecond;
+                        }
+                        return myMinute + "：" + mySecond;
+                    },
+                },
+                watch:{
+                    //換歌的時候
+                    currentSongIndex:function(){
+                        this.currentSongInformation = this.songList[this.currentSongIndex];
+                    },
+                    //[撥放、暫停] 按鈕切換時，設定計時器 or 關閉計時器
+                    playingMark:function(){
+                        if(this.playingMark === true){
+                            this.timer = setInterval(this.AddCurrentSeconds,1000);  //使用計時器紀錄秒數
+                        }
+                        else{
+                            //關閉計時器，不然會越數越快
+                            clearInterval(this.timer);
+                        }
+                    },
+                },
+                methods:{
+                    //切換到 [播放狀態]
+                    SwitchToPlaying:function(){
+                        this.playingMark = true;
+                        this.PlaySong();
+                    },
+                    //切換到 [暫停狀態]
+                    SwitchToPause:function(){
+                        this.playingMark = false;
+                        this.PauseSong();
+                    },
+                    //播放音樂
+                    PlaySong:function(){
+                        myAudio.src = this.songList[this.currentSongIndex].filePath; //音樂檔案路徑
+                        myAudio.currentTime = this.currentSeconds; //從哪開始播放
+                        myAudio.play(); //播放
+                    },
+                    //暫停音樂
+                    PauseSong:function(){
+                        myAudio.pause();
+                    },
+                    //[手動] 選歌
+                    ChangeSong:function(_Index){
+                        //切換歌的時候需初始化
+                        this.ChangeSongInitial();
+                        //切換歌曲，換到指定的歌曲
+                        this.currentSongIndex = _Index;
+                        //依照播放狀態，決定是否繼續播放
+                        this.CheckPlayingStatus();
+                    },
+                    //上一首
+                    PreSong:function(){
+                        this.ChangeSongInitial(); //切換歌的時候需初始化
+
+                        //切換歌曲  (如果是最後一首，就切到第一首)
+                        var mySongListCount = this.songList.length;
+                        if(this.currentSongIndex === 0){
+                            this.currentSongIndex = mySongListCount - 1;
+                        }
+                        else{
+                            this.currentSongIndex--;
+                        }
+                        //依照播放狀態，決定是否繼續播放
+                        this.CheckPlayingStatus();
+                    },
+                    //下一首
+                    NextSong:function(){
+                        this.ChangeSongInitial(); //切換歌的時候需初始化
+
+                        //切換歌曲  (如果是最後一首，就切到第一首)
+                        var mySongListCount = this.songList.length;
+                        if((mySongListCount-1) == this.currentSongIndex){
+                            this.currentSongIndex = 0;
+                        }
+                        else{
+                            this.currentSongIndex++;
+                        }
+                        //依照播放狀態，決定是否繼續播放
+                        this.CheckPlayingStatus();
+                    },
+                    //[手動拉動] 進度條，從正確的位置開始播放
+                    ManualSetCurrentSeconds:function(){
+                        //依照播放狀態，決定是否繼續播放
+                        this.CheckPlayingStatus();
+                    },
+                    //切換歌的時候需初始化
+                    ChangeSongInitial:function(){
+                        this.PauseSong();
+                        this.currentSeconds = 0;
+                    },
+                    //依照播放狀態，決定是否繼續播放
+                    CheckPlayingStatus:function(){
+                        //是否在播放狀態
+                        if(this.playingMark){
+                            this.PlaySong();
+                        }
+                        else{
+                            this.PauseSong();
+                        }
+                    },
+                    //歌播放時間 +1 秒
+                    AddCurrentSeconds:function(){
+                        this.currentSeconds ++;
+                        //播完了自動換下一首
+                        if(this.currentSeconds >= this.songList[this.currentSongIndex].totalSeconds){
+                            this.NextSong();
+                        }
+                    },
+                    //檢查這首歌是不是被播放
+                    CheckPlayingNow:function(_id){
+                        if(_id === this.currentSongIndex){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    },
+                },
+                mounted:function(){
+                    //預設給第一首歌的資訊
+                    this.currentSongInformation = this.songList[this.currentSongIndex];
+                }
+            })
+        })
+    </script>
+</head>
+<body>
+    <div id="VueArea">
+        <div class="music-app">
+             <!-- 圖片 -->
+            <div class="album-cover-area">
+                <img class="big-album-cover" v-bind:src="songList[currentSongIndex].albumCoverPath">
+            </div>
+            <!-- 播放清單 -->
+            <div class="album-list-area">
+                <!-- 歌曲 -->
+                <div class="album-information" :class="{'song-highlight':CheckPlayingNow(song.id)}" v-for="song in songList" @click="ChangeSong(song.id)">
+                    <!-- 小圖 -->
+                    <div>
+                        <img :src="song.albumCoverPath"/>
+                    </div>
+                    <!-- 歌曲資料 -->
+                    <div class="song-information">
+                        <span><strong>{{song.title}}</strong></span>
+                        <br/>
+                        <span>{{song.singer}}</span>
+                    </div>
+                    <!-- 撥放時間 -->
+                    <div>
+                        <span>{{ song.time }}</span>
+                    </div>
+                </div>
+            </div>
+            <!-- 播放器 -->
+            <div class="player-area">
+                <!-- 進度條 -->
+                <div>
+                    <input type="range" min="0" :max="currentSongInformation.totalSeconds" v-model="currentSeconds" step="1" class="progress-bar" @change="ManualSetCurrentSeconds">
+                </div>
+                <!-- 音樂播放器 -->
+                <div class="music-player">
+                    <!-- 歌曲資料 -->
+                    <div class="current-song-information">
+                        <span><strong>{{ currentSongInformation.title }}</strong></span>
+                        <br/>
+                        <span>{{ currentSongInformation.singer }}</span>
+
+                    </div>
+                    <!-- 播放時間 -->
+                    <div>
+                        <span>{{ parseMintue }}</span>
+                    </div>
+                    <!-- 前一首、播放/暫停、下一首 -->
+                    <div class="player-tool">
+                        <!-- 前一首 -->
+                        <span class="fas fa-step-backward" @click="PreSong"></span>
+                        <!-- 播放/暫停 -->
+                        <span class="far fa-play-circle" v-show="!playingMark" @click="SwitchToPlaying"></span>
+                        <span class="far fa-pause-circle" v-show="playingMark" @click="SwitchToPause"></span>
+                        <!-- 暫停、下一首 -->
+                        <span class="fas fa-step-forward" @click="NextSong"></span>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

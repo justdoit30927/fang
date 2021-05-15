@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="../Jquery/jquery-3.4.1.js"></script>
+    <script src="../Vue/vue.js"></script>  
+    <style>
+        /*全屏設定，此設定很好用*/
+        html, body{
+            height: 100%;
+            background-color: cornflowerblue;
+        }
+        #VueArea{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction:column;
+            height: 100%;
+        }
+        .clock{
+            position: relative;
+            height: 50vh;
+            width: 50vh;
+            background-color: white;
+            border-radius: 50%;
+        }
+        .hourHand{
+	        position: absolute;
+            width: 15px;
+            height: 20%;
+            left: 50%;
+            bottom: 50%;
+            background-color: black;
+            transform-origin:50% 100%;
+        }
+        .minuteHand{
+	        position: absolute;
+            width: 10px;
+	        height: 45%;
+            left: 50%;
+            bottom: 50%;
+            background-color: black;
+            transform-origin:50% 100%;
+        }
+        .secondHand{
+	        position: absolute;
+            width: 5px;
+	        height: 45%;
+            left: 50%;
+            bottom: 50%;
+            background-color: red;
+            transform-origin:50% 100%;
+        }
+        .digitalColck{
+            margin: 20px;
+            font-size: 50px;
+        }
+
+    </style>
+    <script>
+        var vm;
+        $(document).ready(function(){
+            vm = new Vue({
+                el:"#VueArea",
+                data:{},
+                methods:{
+                    //設定時鐘
+                    SetClock:function(){
+                        //取得目前時間
+                        var myDate = new Date();
+                        var hh = myDate.getHours(); 
+                        var mm = myDate.getMinutes(); 
+                        var ss = myDate.getSeconds(); 
+
+                        this.DrawClock(hh,mm,ss);
+                        this.DrawDigitalClock(hh,mm,ss);
+                    },
+                    //畫時鐘
+                    DrawClock:function(hh,mm,ss){
+                        //計算 [時針、分針、秒針] 要轉的度數
+                        //計算方式：
+                        //  時針：一小時移動 360/12 度
+                        //  時針：一分鐘移動 360/12/60 度
+                        //  時針：一秒移動   360/12/60/60 度
+
+                        //  分針：一分移動 360/60 度
+                        //  分針：一秒移動 360/60/60 度
+
+                        //  秒針：一秒移動 360/60 度
+                        var myHourDeg = hh * (360/12) + mm * (360/12/60) + ss * (360/12/60/60);//時針
+                        var myMinDeg = mm * (360/60) + ss * (360/60/60);//分針
+                        var mySecDeg = ss * 360/60;//秒針
+
+                        //轉動 [時針、分針、秒針]
+                        var myHourHand = document.querySelector('.hourHand');
+                        var myMinuteHand = document.querySelector('.minuteHand');
+                        var mySecondHand = document.querySelector('.secondHand');
+                        myHourHand.style.transform = "rotate(" + myHourDeg + "deg)";
+                        myMinuteHand.style.transform = "rotate(" + myMinDeg + "deg)";
+                        mySecondHand.style.transform = "rotate(" + mySecDeg + "deg)";
+                    },
+                    //畫數位時鐘
+                    DrawDigitalClock:function (hh,mm,ss){ 
+                        var myMeridiemType = "";//a.m 或 p.m
+                        if(hh === 24){
+                            myMeridiemType = "上午";
+                        }
+                        else if(hh/12 > 1){
+                            myMeridiemType = "下午";
+                        }
+                        else{
+                            myMeridiemType = "上午";
+                        }
+                        //處理 數字上的顯示
+                        hh = this.checkHour(hh);//轉 12 小時制
+                        mm = this.checkTime(mm); 
+                        ss = this.checkTime(ss); 
+                        //顯示
+                        document.querySelector('.digitalColck').innerHTML = myMeridiemType + hh + ":" + mm + ":" + ss; 
+                    },
+                    //0~9，前面要補一個零，不這樣處裡的話，0~9 都會是單個數字
+                    checkTime:function (i){ 
+                        if(i < 10) { 
+                            i = "0" + i; 
+                        } 
+                        return i; 
+                    },
+                    //js 取到的時間會是 24  小時制，如果要轉成 12 小時制，就必須除以12，但這樣12、24 就會變成 0 也很怪，所以 12、24 要特別處裡
+                    checkHour:function (i){ 
+                        if(i%12 === 0){
+                            return 12;    
+                        }
+                        else{
+                            return i%12;
+                        }
+                    },
+                },
+                mounted:function(){
+                    setInterval(this.SetClock,1000);//每一秒更新畫面一次
+                }
+            })
+
+        })
+    </script>
+</head>
+<body>
+    <div id="VueArea">
+        <!-- 時鐘 -->
+        <div class="clock">
+            <!-- 時針 -->
+            <div class="hourHand"></div>
+            <!-- 分針 -->
+            <div class="minuteHand"></div>
+            <!-- 秒針 -->
+            <div class="secondHand"></div>
+        </div>
+        <!-- 數位時鐘 -->
+        <div class="digitalColck"></div>
+    </div>
+</body>
+</html>

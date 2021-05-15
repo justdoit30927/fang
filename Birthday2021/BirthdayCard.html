@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!--JS-->
+    <script src="../Jquery/jquery-3.4.1.js"></script>
+    <!-- <script src="../Jquery/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>   可以把元素拉到任意位置的jQuery drag -->
+    <script src="../Vue/vue.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/firebasejs/6.5.0/firebase.js"></script>
+    <script src="./JS/config.js"></script>
+    <!--CSS-->
+    <!--<script src="../Jquery/jquery-ui-1.12.1.custom/jquery-ui.min.css"></script>-->
+    <link rel=stylesheet type="text/css" href="./BirthdayCard.css">
+    <link rel=stylesheet type="text/css" href="./fontawesome/css/all.css">
+
+
+    <script>
+        var vm;
+        var db = firebase.database();//取得資料庫
+        var cvUserName = "Fang";//使用者ID
+        var myAudio = new Audio();
+
+        if(findGetParameter("User") != null){
+            cvUserName = findGetParameter("User");
+        }
+
+        $(document).ready(function(){
+            vm = new Vue({
+                el:"#VueArea",
+                data:{
+                    currentPage:"",             //目前頁面
+                    currnetTime:new Date(),     //目前時間
+                    showNewMessageMark:false,   //顯示訊息記號
+                    UsingMark:false,            //使用記號
+                    grabScreenMark:false,       //抓著螢幕記號
+                    mouseY:0,                   //起始滑鼠位置
+                    messageShowMark:false,      //新訊息顯示記號         
+                },
+                computed:{
+                    //目前 月
+                    currentMonth:function(){
+                        return this.currnetTime.getMonth()+1;
+                    },
+                    //目前 日
+                    currentDate:function(){
+                        return this.currnetTime.getDate();
+                    },
+                    //目前 星期
+                    currentWeek:function(){
+                        var myWeek ="";
+                        switch(this.currnetTime.getDay()){
+                            case 0:
+                                myWeek = "星期日";
+                                break;
+                            case 1:
+                                myWeek = "星期一";
+                                break;
+                            case 2:
+                                myWeek = "星期二";
+                                break;
+                            case 3:
+                                myWeek = "星期三";
+                                break;
+                            case 4:
+                                myWeek = "星期四";
+                                break;
+                            case 5:
+                                myWeek = "星期五";
+                                break;
+                            case 6:
+                                myWeek = "星期六";
+                                break;
+                        }
+                        return myWeek;
+                    },
+                    //目前 時
+                    currentHour:function(){
+                        // js 取到的時間會是 24  小時制，如果要轉成 12 小時制，就必須除以12，但這樣12、24 就會變成 0 也很怪，所以 12、24 要特別處裡
+                        var myHour = this.currnetTime.getHours();
+                        if(myHour%12 === 0){
+                            return 12;
+                        }
+                        else{
+                            return myHour%12;
+                        }
+                    },
+                    //目前 分
+                    currentMinute:function(){
+                        // 0~9，前面要補一個零，不這樣處裡的話，0~9 都會是單個數字
+                        var myMinute = this.currnetTime.getMinutes();
+                        if(myMinute < 10) {
+                            myMinute = "0" + myMinute;
+                        }
+                        return myMinute;
+                    },
+                },
+                watch:{
+                    //使用中記號，關掉螢幕保護
+                    UsingMark:function(){
+                        //關掉螢幕保護
+                        var myScreenHeight = parseInt($("#ScreenProtect").css("height"),10);
+                        var myCurrentTop = parseInt($("#ScreenProtect").css("top"),10);
+                        for(var i = myCurrentTop; i < myScreenHeight; i++ ){
+                            //為了做出動畫效果，每0.3秒更新一次畫面
+                            setTimeout(() => {
+                                var wkTop = parseInt($("#ScreenProtect").css("top"),10);
+                                $("#ScreenProtect").css("top", (wkTop -1) + "px");
+                            }, i*0.3);
+                        }
+                    }
+                },
+                methods:{
+                    //取得目前時間
+                    GetTime:function(){
+                        this.currnetTime = new Date();
+                    },
+                    //顯示新訊息
+                    showNewMessage:function(){
+                        this.showNewMessageMark = true;
+                    },
+                    //自動往上滑動
+                    autoSlipUp:function(_currentTop){
+                        this.UsingMark = true;
+                        this.MoveTo('Home');
+                    },
+                    //////   手動往上滑動   /////
+                    //開始滑動
+                    GetPosition:function(){
+                        this.mouseY = event.clientY
+                        this.grabScreenMark = true;
+                    },
+                    //結束滑動
+                    OriginPosition:function(){
+                        this.mouseY = 0;
+                        this.grabScreenMark = false;
+                        //非使用中，回復螢幕保護原本的位置
+                        if(this.UsingMark === false){
+                            var myTop =  parseInt($("#ScreenProtect").css("top"),10);
+                            if(myTop >= 0){
+                                //往下拉的時候
+                                for(var i = myTop; i > 0; i-- ){
+                                    setTimeout(() => {
+                                        var wkTop = parseInt($("#ScreenProtect").css("top"),10);
+                                        $("#ScreenProtect").css("top", (wkTop -1) + "px");
+                                    }, i*0.3);
+                                }
+                            }
+                            else{
+                                //往上拉的時候
+                                for(var i = myTop; i < 0; i++ ){
+                                    setTimeout(() => {
+                                        var wkTop = parseInt($("#ScreenProtect").css("top"),10);
+                                        $("#ScreenProtect").css("top", (wkTop + 1) + "px");
+                                    }, i*0.3);
+                                }
+                            }
+                        }
+                    },
+                    //滑動中
+                    ManualSlipping:function(){
+                        //畫面被抓住中，才改變
+                        if(this.grabScreenMark === true){
+                            var myOrigionMouseY = this.mouseY;  //最一開始，滑鼠位置
+                            var myCurrentMouseY = event.clientY;//目前，滑鼠位置
+                            //滑動保護畫面的位置
+                            $("#ScreenProtect").css("top",myCurrentMouseY - myOrigionMouseY + "px");
+
+                            var myTop =  parseInt($("#ScreenProtect").css("top"),10);
+                            var myHeigth = Math.abs(parseInt($("#ScreenProtect").css("height"),10));
+                            //滑超過一半，就觸發自動滑動
+                            if((-1) * myTop > myHeigth/2 ){
+                                this.UsingMark = true;
+                                this.MoveTo('Home');
+                                this.grabScreenMark = false;
+                            }
+                        }
+                    },
+                    //導頁
+                    MoveTo:function(_TargetPage){
+                        //把螢幕保護關掉
+                        if(this.UsingMark === false){
+                            this.UsingMark = true;
+                        }
+                        //導頁
+                        this.currentPage = _TargetPage;
+                    },
+                    //取得目前元素
+                    GetCurrentElement:function(){
+                        var myIndex = $(event.target).index();//取得相對於其同胞元素的index 位置 (特別說明:index() 取道的是同一層所有種類的元素，並不是只有相同的種類，還蠻好用的)
+                        event.dataTransfer.setData("Text", myIndex);//不一定要給ID，setData() 可以把想要傳的資訊記住
+                    },
+                    //放下元素
+                    DropElement:function(){
+                        var myOldIndex = event.dataTransfer.getData("Text");//取得 setData() 藏的資料，
+                        var myNewIndex = $(event.target).index();//目標是第幾個
+
+                        var myElement = $(event.target).parent().children().eq(myOldIndex)[0];//要移動的元素
+                        //前往後移：移到目標的後面
+                        //後往前移：移到目標的前面
+                        if(myOldIndex > myNewIndex){
+                            event.target.before(myElement);//.before()、.after()、appendChild() 裡面都是放元素，會把原本的元素移除，放到新的位置
+                        }
+                        else{
+                            event.target.after(myElement);
+                        }
+                    },
+                    //取消預設事件 (因為 dropOver 的預設事件是所有的元素都不能拖曳，所以要取消)
+                    CancelDefaultEvent:function(){
+                        event.preventDefault();
+                    }
+                },
+                mounted:function(){
+                    setTimeout(this.showNewMessage, 1000);//過兩秒出現訊息
+                },
+                created:function(){
+                    //取得現在時間
+                    setInterval(this.GetTime,1000);
+                }
+            })
+        })
+
+        //登入時間
+        var myDate = new Date();
+        var myTime = myDate.toString();
+            db.ref("DB01/EnterTime/").push({
+                EnterTime: myTime                   
+            })
+        /* 取參數 */
+        function findGetParameter(parameterName) {
+            var result = null,
+		        tmp = [];
+            var items = location.search.substr(1).split("&");
+            for (var index = 0; index < items.length; index++) {
+                tmp = items[index].split("=");
+                if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+            }
+            return result;
+        }
+
+    </script>
+</head>
+<body>
+    <!--Vue 區塊-->
+    <div id="VueArea">
+        <!--手機主體-->
+        <div id="Iphone">
+            <!--手機 螢幕-->
+            <div class="lens"></div>
+            <!--手機 螢幕-->
+            <div class="monitor">
+                <!--螢幕保護程式-->
+                <div id="ScreenProtect" class="screenProtect"  @mousedown="GetPosition" @mouseup="OriginPosition" @mousemove="ManualSlipping">
+                    <div>
+                        <span class="time"> {{currentHour}}：{{currentMinute}} </span>
+                        <br/>
+                        <span class="date"> {{currentMonth}} 月 {{currentDate}} 日  {{currentWeek}} </span>
+                    </div>
+                    <div>
+                        <div class="newMessage" v-show="showNewMessageMark" @click="MoveTo('LineApp')">
+                            <strong>您有一則新訊息</strong>
+                        </div>
+                    </div>
+                    <div class="unluck">
+                        <span  @click="autoSlipUp">按下主畫面按鈕來解鎖 &nbsp;&nbsp;
+                            <span class="fas fa-angle-double-up"></span>
+                        </span>
+                    </div>
+                </div>
+                <!-- 主頁面 -->
+                <div v-show="currentPage ==='Home'">
+                    <img src="./Img/Photo.png" class="app" @click="MoveTo('PhotoApp')" draggable="true" @dragStart="GetCurrentElement" @dragover="CancelDefaultEvent" @drop="DropElement"/>
+                    <img src="./Img/Line.png" class="app" @click="MoveTo('LineApp')" draggable="true" @dragStart="GetCurrentElement" @dragover="CancelDefaultEvent" @drop="DropElement"/>
+                    <img src="./Img/Camera.png" class="app" @click="MoveTo('CameraApp')" draggable="true" @dragStart="GetCurrentElement" @dragover="CancelDefaultEvent" @drop="DropElement"/>
+                    <img src="./Img/Clock.png" class="app" @click="MoveTo('ClockApp')" draggable="true" @dragStart="GetCurrentElement" @dragover="CancelDefaultEvent" @drop="DropElement"/>
+                    <img src="./Img/Spotify.png" class="app" @click="MoveTo('SpotifyApp')" draggable="true" @dragStart="GetCurrentElement" @dragover="CancelDefaultEvent" @drop="DropElement"/>
+                </div>
+
+                <!-- 相片 APP -->
+                <photo-app-component v-if="currentPage ==='PhotoApp'"></photo-app-component>
+                <!-- Line APP -->
+                <line-app-component v-if="currentPage ==='LineApp'"></line-app-component>
+                <!-- Camera APP -->
+                <camera-app-component v-if="currentPage ==='CameraApp'"></camera-app-component>
+                <!-- Clock APP -->
+                <clock-app-component v-if="currentPage ==='ClockApp'"></clock-app-component>
+                <!-- Spotify APP (為了能背景撥放，所以是 v-show)-->
+                <spotify-app-component v-show="currentPage ==='SpotifyApp'"></spotify-app-component>
+            </div>
+
+            <!--手機 面板-->
+            <div class="panel">
+                <!--Home鍵-->
+                <div class="homeBtn" @Click="MoveTo('Home')"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
+
+<!-- ****************************************************************************************************** -->
+<!-- *******************************    Vue Component 區塊   *********************************************** -->
+<!-- ****************************************************************************************************** -->
+<script>
+    /*******  相片 ********/
+    Vue.component("photo-app-component",{
+        template: "#Photo_App_Template",
+        props:[],
+        data:function(){
+            return {
+                currentPhotoName:0,//目前照片
+                photoNameList:[0,1,2,3,4,5,6,7,8,9],//所有的照片
+                favoriteList:[],//喜歡的照片
+                heartStatus:false,//愛心的狀態
+                trashStatus:false//垃圾筒的狀態
+            }
+        },
+        methods:{
+            //前一張照片
+            PreviousPhoto:function(){
+                var myIndex = this.photoNameList.indexOf(this.currentPhotoName);
+
+                //如果是第一張，跳到最後一張
+                if(myIndex === 0){
+                    this.currentPhotoName = this.photoNameList[(this.photoNameList.length-1)];
+                }
+                else{
+                    this.currentPhotoName = this.photoNameList[(myIndex-1)];
+                }
+                this.CurrentHeart();
+            },
+            //下一張照片
+            NextPhoto:function(){
+                var myIndex = this.photoNameList.indexOf(this.currentPhotoName);
+
+                //如果是最後一張，跳到第一張
+                if(myIndex === this.photoNameList.length-1){
+                    this.currentPhotoName = this.photoNameList[0];
+                }
+                else{
+                    this.currentPhotoName = this.photoNameList[(myIndex+1)];
+                }
+                this.CurrentHeart();
+            },
+            //喜歡照片
+            AddFavorite:function(){
+                var myComponent = this;
+                if(this.favoriteList.indexOf(this.currentPhotoName) === -1){
+                    //案基數次喜歡，放進喜歡
+                    this.favoriteList.push(this.currentPhotoName);
+                }
+                else{
+                    //案雙數次喜歡，就取消喜歡
+                    this.favoriteList = this.favoriteList.filter(function(item,index){
+                        return item != myComponent.currentPhotoName;
+                    })
+                }
+                this.CurrentHeart();
+            },
+            //滑過垃圾桶
+            OverTrash:function(){
+                this.trashStatus = true;//改變垃圾桶顏色 (黑色)
+            },
+            //離開垃圾桶
+            OutTrash:function(){
+                this.trashStatus = false;//改變垃圾桶顏色 (實線)
+            },
+            //刪除照片
+            DeletePhoto:function(){
+                //記住要刪除的這張
+                var myTempPhotoName = this.currentPhotoName;
+                //先移動到下一張
+                this.NextPhoto();
+                //刪除剛剛不喜歡的那張
+                this.photoNameList = this.photoNameList.filter(function(item,index){
+                        return item != myTempPhotoName;
+                })
+            },
+            //目前這張照片是否為喜歡
+            CurrentHeart:function(){
+                if(this.favoriteList.indexOf(this.currentPhotoName) != -1){
+                    this.heartStatus = true;
+                }
+                else{
+                    this.heartStatus = false;
+                }
+            },
+        },
+        mounted:function(){
+
+        }
+    })
+
+    /*******  Line ********/
+    Vue.component("line-app-component",{
+        template: "#Line_App_Template",
+        props:[],
+        data:function(){
+            return{
+                chatLog:"",//聊天紀錄
+                inputMessage:"",//輸入文字
+                hoverSubmitMark:false //在送出按鈕上
+            }
+        },
+        methods:{
+            //檢查是不是別人說的話
+            OtherCheck:function(_UserName){
+                if(_UserName != cvUserName){
+                    return true;
+                }
+                else{
+                    return false;
+                }
+            },
+            //觸碰時，改變 [發送按鈕] 的樣式
+            HoverSubmit:function(){
+                this.hoverSubmitMark = true;
+            },
+            OutSubmit:function(){
+                this.hoverSubmitMark = false;
+            },
+            //發送說話
+            SubmitSpeak:function(){
+                var myMessage = this.inputMessage;
+                db.ref("/DB01/ChatLog/").push({
+                    UserName:cvUserName,
+                    Message:myMessage
+                })
+                //輸入關鍵字 1
+                if(myMessage.indexOf("說吧") != -1){
+                    this.GetWhisper("Whisper_1");
+                }
+                //輸入關鍵字 2
+                if(myMessage.indexOf("繼續說") != -1){
+                    this.GetWhisper("Whisper_2");
+                }
+
+                this.inputMessage = "";//清空輸入框
+            },
+            //取得悄悄話
+            GetWhisper:function(_DB_Name){
+                db.ref("/DB01/" + _DB_Name +"/").once('value',function(snapshot){                        
+                    var myWhisperList = snapshot.val();
+                    myWhisperList.forEach(function(item,index){
+                        var wkMessage = item;
+                        db.ref("/DB01/ChatLog/").push({
+                            UserName:"John",
+                            Message:wkMessage
+                        })
+                    })
+                })
+            }
+        },
+        updated:function(){
+            //拉到最下方
+            var myScrollHeight = $('.chatArea')[0].scrollHeight;
+            $(".chatArea").scrollTop(myScrollHeight);
+        },
+        mounted:function(){
+            //拉到最下方
+            var myScrollHeight = $('.chatArea')[0].scrollHeight;
+            $(".chatArea").scrollTop(myScrollHeight);
+        },
+        created:function(){
+            var myComponent = this;
+            //持續監聽，是否有改變，找出最新的50筆
+            db.ref("/DB01/ChatLog/").limitToLast(50).on('value',function(snapshot){
+                myComponent.chatLog = snapshot.val();
+            })
+        }
+    })
+
+    /*******  相機 ********/
+    Vue.component("camera-app-component",{
+        template:"#Camera_App_Template",
+        data:function(){
+            return{
+                CameraMark:true,    //true:相機畫面   false:相簿畫面
+                NewestPhoto:"",     //最新拍的照片
+                currentPhoto:"",    //相簿目前顯示的照片
+                PhotoList:[],       //拍的所有照片
+            }
+        },
+        methods:{
+            //拍照
+            TakePhoto:function(){
+                var myVideo = $(".cameraVideo")[0];//取得當下的視訊資料
+                var myCanvas = this.DrawPhoto(myVideo);//畫成圖片
+                var myImgData = myCanvas.toDataURL("image/jpg");//轉換成jpg格式
+                this.StorePhotoDB(myImgData);//存 照片 進DB
+                this.NewestPhoto = myImgData;
+                this.PhotoList.push(myImgData);
+                $(".newestPhoto").attr("src",myImgData);
+            },
+            //把取得的視訊資料，畫成圖片
+            DrawPhoto:function(video){
+                var canvas = document.createElement('canvas'); //建立canvas js DOM元素
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                var ctx = canvas.getContext('2d');
+                //反轉圖片 180度
+                ctx.translate(video.videoWidth,0);//反轉後會偏移，所以要移動回來
+                ctx.scale(-1,1);//反轉
+                //把圖片畫在 canvas 上
+                ctx.drawImage(video, 0, 0);
+                return canvas;
+            },
+            //存 照片 進DB
+            StorePhotoDB:function(_Photo){
+                db.ref("/DB01/Photo/").push({
+                    Photo:_Photo,
+                })
+            }, 
+            //打開相簿
+            OpenAlbum:function(){
+                this.CameraMark = false;
+                //顯示最後一張照片
+                var myLastPhoto = this.PhotoList.length;
+                this.currentPhoto = this.PhotoList[myLastPhoto-1];
+            },
+            //回到相機
+            BackToCamera:function(){
+                this.CameraMark = true;
+            },
+            //前一張照片
+            PreviousPhoto:function(){
+                var myIndex = this.PhotoList.indexOf(this.currentPhoto);
+
+                //如果是第一張，跳到最後一張
+                if(myIndex === 0){
+                    this.currentPhoto = this.PhotoList[(this.PhotoList.length-1)];
+                }
+                else{
+                    this.currentPhoto = this.PhotoList[(myIndex-1)];
+                }
+            },
+            //下一張照片
+            NextPhoto:function(){
+                var myIndex = this.PhotoList.indexOf(this.currentPhoto);
+
+                //如果是最後一張，跳到第一張
+                if(myIndex === this.PhotoList.length-1){
+                    this.currentPhoto = this.PhotoList[0];
+                }
+                else{
+                    this.currentPhoto = this.PhotoList[(myIndex+1)];
+                }
+            },
+        },
+        mounted:function(){
+            //做出視訊的畫面
+
+            //定義要取得的影音內容，包含影像和聲音
+            var constraints = {
+                //audio: true,  //聲音
+                video: {
+                    facingMode: "user"  //開前鏡頭
+                }
+                // video: true 這樣會取不到
+            }
+            //持續取得鏡頭畫面
+            navigator.mediaDevices.getUserMedia(constraints).then(function(stream){
+                //已經不能這樣寫了
+                //var myURL = URL.createObjectURL(stream);
+                //inputVideo.src = myURL;
+                var myVideo = document.querySelector('.cameraVideo');
+                myVideo.srcObject = stream;
+                myVideo.play();//連續撥放出來
+            })
+
+
+            //讀取 DB 照片  (沒用)
+            // var myComponent = this;
+            // //持續監聽，是否有改變，找出最新的50筆
+            // db.ref("/DB01/Photo/").on('value',function(snapshot){
+            //     Object.keys(snapshot.val()).map(function(objectKey, index) {
+            //         var value = snapshot.val()[objectKey];
+            //         myComponent.PhotoList.push(value.Photo);
+            //     });
+            // })
+        }
+    })
+
+
+    /****** 時鐘 *******/
+    Vue.component("clock-app-component",{
+        template:"#Clock_App_Template",
+        data:function(){
+            return{
+            }
+        },
+        methods:{
+            //設定時鐘
+            SetClock:function(){
+                //取得目前時間
+                var myDate = new Date();
+                var hh = myDate.getHours(); 
+                var mm = myDate.getMinutes(); 
+                var ss = myDate.getSeconds(); 
+
+                this.DrawClock(hh,mm,ss);
+                this.DrawDigitalClock(hh,mm,ss);
+            },
+            //畫時鐘
+            DrawClock:function(hh,mm,ss){
+                //計算 [時針、分針、秒針] 要轉的度數
+                //計算方式：
+                //  時針：一小時移動 360/12 度
+                //  時針：一分鐘移動 360/12/60 度
+                //  時針：一秒移動   360/12/60/60 度
+
+                //  分針：一分移動 360/60 度
+                //  分針：一秒移動 360/60/60 度
+
+                //  秒針：一秒移動 360/60 度
+                var myHourDeg = hh * (360/12) + mm * (360/12/60) + ss * (360/12/60/60);//時針
+                var myMinDeg = mm * (360/60) + ss * (360/60/60);//分針
+                var mySecDeg = ss * 360/60;//秒針
+
+                //轉動 [時針、分針、秒針]
+                var myHourHand = document.querySelector('.hourHand');
+                var myMinuteHand = document.querySelector('.minuteHand');
+                var mySecondHand = document.querySelector('.secondHand');
+                myHourHand.style.transform = "rotate(" + myHourDeg + "deg)";
+                myMinuteHand.style.transform = "rotate(" + myMinDeg + "deg)";
+                mySecondHand.style.transform = "rotate(" + mySecDeg + "deg)";
+            },
+            //畫數位時鐘
+            DrawDigitalClock:function (hh,mm,ss){ 
+                var myMeridiemType = "";//a.m 或 p.m
+                if(hh === 24){
+                    myMeridiemType = "上午";
+                }
+                else if(hh/12 > 1){
+                    myMeridiemType = "下午";
+                }
+                else{
+                    myMeridiemType = "上午";
+                }
+                //處理 數字上的顯示
+                hh = this.checkHour(hh);//轉 12 小時制
+                mm = this.checkTime(mm); 
+                ss = this.checkTime(ss); 
+                //顯示
+                document.querySelector('.digitalColck').innerHTML = myMeridiemType + hh + ":" + mm + ":" + ss; 
+            },
+            //0~9，前面要補一個零，不這樣處裡的話，0~9 都會是單個數字
+            checkTime:function (i){ 
+                if(i < 10) { 
+                    i = "0" + i; 
+                } 
+                return i; 
+            },
+            //js 取到的時間會是 24  小時制，如果要轉成 12 小時制，就必須除以12，但這樣12、24 就會變成 0 也很怪，所以 12、24 要特別處裡
+            checkHour:function (i){ 
+                if(i%12 === 0){
+                    return 12;    
+                }
+                else{
+                    return i%12;
+                }
+            },
+        },
+        mounted:function(){
+            setInterval(this.SetClock,1000);//每一秒更新畫面一次
+        }
+    })
+
+    /****** 音樂 *******/
+    Vue.component("spotify-app-component",{
+        template:"#Spotify_App_Template",
+        data:function(){
+            return{
+                loadFinishMark:false,       //歌單下載完成記號
+                currentSongInformation:"",  //目前這首個的資訊
+                currentSongIndex: 0,        //現在在撥哪首歌
+                currentSeconds:0,           //目前歌撥放時間  (進度條要使用)
+                playingMark:false,          //撥放記號  true:撥放中    false:暫停
+                timer:"",                   //計時器   (計算目前這首歌撥了多久)
+                songList:[],                //歌單
+                // {
+                //     id:0,
+                //     title:"You've Got a Friend in Me",  //歌名
+                //     singer:"Randy Newman",  //演出者
+                //     albumCoverPath:"./Img/Youve_Got_a_Friend_in_Me.jpg",    //專輯封面
+                //     filePath:"./Music/Youve_Got_a_Friend_in_Me.mp3",    //.mp3 路徑
+                //     time:"02:08",   //總時間 (分：秒)
+                //     totalSeconds:"128", //總秒數
+                //     likeMark:true   //喜歡記號
+                //     },
+                //     {
+                //     id:1,
+                //     title:"Tomorrow tonight",
+                //     singer:"Lootes",
+                //     albumCoverPath:"./Img/Tomorrow_tonight.jpg",
+                //     filePath:"./Music/Tomorrow_tonight.mp3",
+                //     time:"03:23",
+                //     totalSeconds:"203",
+                //     likeMark:true
+                // },                
+            }
+        },
+        computed:{
+            //把 秒 轉換成  分：秒
+            parseMintue:function(){
+                var myMinute = parseInt(this.currentSeconds/60);
+                var mySecond = this.currentSeconds%60;
+                if (myMinute / 10 < 1) {
+                    myMinute = "0" + myMinute;
+                }
+                if (mySecond / 10 < 1) {
+                    mySecond = "0" + mySecond;
+                }
+                return myMinute + "：" + mySecond;
+            },
+        },
+        watch:{
+            //換歌的時候
+            currentSongIndex:function(){
+                this.currentSongInformation = this.songList[this.currentSongIndex];
+            },
+            //[撥放、暫停] 按鈕切換時，設定計時器 or 關閉計時器
+            playingMark:function(){
+                if(this.playingMark === true){
+                    this.timer = setInterval(this.AddCurrentSeconds,1000);  //使用計時器紀錄秒數
+                }
+                else{
+                    //關閉計時器，不然會越數越快
+                    clearInterval(this.timer);
+                }
+            },
+        },
+        methods:{
+            //切換到 [播放狀態]
+            SwitchToPlaying:function(){
+                this.playingMark = true;
+                this.PlaySong();
+            },
+            //切換到 [暫停狀態]
+            SwitchToPause:function(){
+                this.playingMark = false;
+                this.PauseSong();
+            },
+            //播放音樂
+            PlaySong:function(){
+                myAudio.src = this.songList[this.currentSongIndex].filePath; //音樂檔案路徑
+                myAudio.currentTime = this.currentSeconds; //從哪開始播放
+                myAudio.play(); //播放
+            },
+            //暫停音樂
+            PauseSong:function(){
+                myAudio.pause();
+            },
+            //[手動] 選歌
+            ChangeSong:function(_Index){
+                //切換歌的時候需初始化
+                this.ChangeSongInitial();
+                //切換歌曲，換到指定的歌曲
+                this.currentSongIndex = _Index;
+                //依照播放狀態，決定是否繼續播放
+                this.CheckPlayingStatus();
+            },
+            //上一首
+            PreSong:function(){
+                this.ChangeSongInitial(); //切換歌的時候需初始化
+
+                //切換歌曲  (如果是最後一首，就切到第一首)
+                var mySongListCount = this.songList.length;
+                if(this.currentSongIndex === 0){
+                    this.currentSongIndex = mySongListCount - 1;
+                }
+                else{
+                    this.currentSongIndex--;
+                }
+                //依照播放狀態，決定是否繼續播放
+                this.CheckPlayingStatus();
+            },
+            //下一首
+            NextSong:function(){
+                this.ChangeSongInitial(); //切換歌的時候需初始化
+
+                //切換歌曲  (如果是最後一首，就切到第一首)
+                var mySongListCount = this.songList.length;
+                if((mySongListCount-1) == this.currentSongIndex){
+                    this.currentSongIndex = 0;
+                }
+                else{
+                    this.currentSongIndex++;
+                }
+                //依照播放狀態，決定是否繼續播放
+                this.CheckPlayingStatus();
+            },
+            //[手動拉動] 進度條，從正確的位置開始播放
+            ManualSetCurrentSeconds:function(){
+                //依照播放狀態，決定是否繼續播放
+                this.CheckPlayingStatus();
+            },
+            //切換歌的時候需初始化
+            ChangeSongInitial:function(){
+                this.PauseSong();
+                this.currentSeconds = 0;
+            },
+            //依照播放狀態，決定是否繼續播放
+            CheckPlayingStatus:function(){
+                //是否在播放狀態
+                if(this.playingMark){
+                    this.PlaySong();
+                }
+                else{
+                    this.PauseSong();
+                }
+            },
+            //歌播放時間 +1 秒
+            AddCurrentSeconds:function(){
+                this.currentSeconds ++;
+                //播完了自動換下一首
+                if(this.currentSeconds >= this.songList[this.currentSongIndex].totalSeconds){
+                    this.NextSong();
+                }
+            },
+            //檢查這首歌是不是被播放
+            CheckPlayingNow:function(_id){
+                if(_id === this.currentSongIndex){
+                    return true;
+                }
+                else{
+                    return false;
+                }
+            },
+        },
+        mounted:function(){
+            
+        },
+        created:function(){
+            var myComponent = this;
+            //DB 取得歌曲清單
+            db.ref("/DB01/SongList/").once('value',function(snapshot){
+                //塞進歌單中
+                var wkTemp = snapshot.val();
+                wkTemp.forEach(function(item,index){
+                    myComponent.songList.push(item);
+                })
+                //預設給第一首歌的資訊
+                myComponent.currentSongInformation = myComponent.songList[myComponent.currentSongIndex];
+                //歌單載入完成
+                myComponent.loadFinishMark = true;
+            })
+            
+            //this.songList.push();
+            
+        }
+    })
+</script>
+
+
+
+<!-- ****************************************************************************************************** -->
+<!-- *******************************    Vue Template 區塊   *********************************************** -->
+<!-- ****************************************************************************************************** -->
+
+<!-- 照片 app -->
+<template id="Photo_App_Template">
+    <div class="appPage photoApp">
+        <!-- 大圖 -->
+        <div class="photoAppScreen">
+            <!-- 前一張照片 -->
+            <div class="previousArrow" @click="PreviousPhoto"></div>
+            <!-- 照片顯示 -->
+            <img :src="'./Img/PhotoApp_' + currentPhotoName + '.jpg'">
+            <!-- 下一張照片 -->
+            <div class="nextArrow" @click="NextPhoto"></div>
+        </div>
+        <!-- 功能 -->
+        <div class="photoAppTool">
+            <div :class="{'fas':heartStatus,'far':!heartStatus}" class="fa-heart fa-lg" @click="AddFavorite"></div> <!-- fas 是有塗色、far 只有線 -->
+            <div :class="{'fas':trashStatus,'far':!trashStatus}" class="fa-trash-alt fa-lg" @click="DeletePhoto" @mouseover="OverTrash" @mouseout="OutTrash"></div>
+        </div>
+    </div>
+</template>
+
+
+<!-- Line app -->
+<template id="Line_App_Template">
+    <div class="appPage lineApp">
+        <!-- 聊天紀錄框 -->
+        <div class="chatArea">
+            <!-- 單次對話 -->
+            <div v-for="item in chatLog" class="messageRow" :class="{otherMessageRow:OtherCheck(item.UserName)}">
+                <!-- 對話框 -->
+                <div class="messageDialog" :class="{otherMessage:OtherCheck(item.UserName)}">
+                    {{item.Message}}
+                </div>
+            </div>
+        </div>
+        <!-- 輸入框 -->
+        <div class="inputArea">
+            <textarea class="lineTextArea" row="2" cols="20" v-model="inputMessage"></textarea>
+            <div :class="{'fas':hoverSubmitMark,'far':!hoverSubmitMark }" class="fa-arrow-alt-circle-right fa-lg" @mouseover="HoverSubmit" @mouseout="OutSubmit" @click="SubmitSpeak"></div><!-- fas 是實體、far 是線 -->
+        </div>
+    </div>
+</template>
+
+<!-- 相機 app -->
+<template id="Camera_App_Template">
+    <div class="appPage cameraApp">
+        <!-- 相機 -->
+        <div class="camera" v-show="CameraMark">
+            <!-- 鏡頭畫面 -->
+            <div class="cameraScreen">
+                <video class="cameraVideo"></video> <!-- 繪製出來的畫面 -->
+            </div>
+            <!-- 拍照 -->
+            <div class="cameraTool">
+                <!-- 相片集合 -->
+                <div class="photoList">
+                    <img class="newestPhoto":src="NewestPhoto" @click="OpenAlbum"/>
+                </div>
+                <!-- 按鈕 -->
+                <div class="cameraBtn" @click="TakePhoto"></div>
+            </div>
+        </div>
+
+        <!-- 相簿 -->
+        <div class="album" v-show="!CameraMark">
+            <!-- 上一頁 -->
+            <div class="albumBack" >
+                <div class="albumBackArrow fas fa-chevron-left" @click="BackToCamera"></div>
+            </div>
+            <!-- 相簿畫面 -->
+            <div class="photoInAlbum">
+                <!-- 前一張照片 -->
+                <div class="previousArrow" @click="PreviousPhoto"></div>
+                <!-- 照片顯示 -->
+                <img :src="currentPhoto">
+                <!-- 下一張照片 -->
+                <div class="nextArrow" @click="NextPhoto"></div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<!-- 時鐘 app -->
+<template id="Clock_App_Template">
+    <div class="appPage clockApp">
+        <div>
+            <!-- 時鐘 -->
+            <div class="clock">
+                <!-- 時針 -->
+                <div class="hourHand"></div>
+                <!-- 分針 -->
+                <div class="minuteHand"></div>
+                <!-- 秒針 -->
+                <div class="secondHand"></div> 
+            </div>       
+        </div>
+        <div>
+            <!-- 數位時鐘 -->
+            <div class="digitalColck"></div>        
+        </div>
+    </div>
+</template>
+
+<!-- Spotify app -->
+<template id="Spotify_App_Template">
+    <div class="appPage music-app" v-if="loadFinishMark">
+        <!-- 圖片 -->
+       <div class="album-cover-area">
+           <img class="big-album-cover" v-bind:src="songList[currentSongIndex].albumCoverPath">
+       </div>
+       <!-- 播放清單 -->
+       <div class="album-list-area">
+           <!-- 歌曲 -->
+           <div class="album-information" :class="{'song-highlight':CheckPlayingNow(song.id)}" v-for="song in songList" @click="ChangeSong(song.id)">
+               <!-- 小圖 -->
+               <div>
+                   <img :src="song.albumCoverPath"/>
+               </div>
+               <!-- 歌曲資料 -->
+               <div class="song-information">
+                   <span><strong>{{song.name}}</strong></span>
+                   <br/>
+                   <span>{{song.singer}}</span>
+               </div>
+               <!-- 撥放時間 -->
+               <div>
+                   <span>{{ song.time }}</span>
+               </div>
+           </div>
+       </div>
+       <!-- 播放器 -->
+       <div class="player-area">
+           <!-- 進度條 -->
+           <div>
+               <input type="range" min="0" :max="currentSongInformation.totalSeconds" v-model="currentSeconds" step="1" class="progress-bar" @change="ManualSetCurrentSeconds">
+           </div>
+           <!-- 音樂播放器 -->
+           <div class="music-player">
+               <!-- 歌曲資料 -->
+               <div class="current-song-information">
+                   <span><strong>{{ currentSongInformation.name }}</strong></span>
+                   <br/>
+                   <span>{{ currentSongInformation.singer }}</span>
+
+               </div>
+               <!-- 播放時間 -->
+               <div>
+                   <span>{{ parseMintue }}</span>
+               </div>
+               <!-- 前一首、播放/暫停、下一首 -->
+               <div class="player-tool">
+                   <!-- 前一首 -->
+                   <span class="fas fa-step-backward" @click="PreSong"></span>
+                   <!-- 播放/暫停 -->
+                   <span class="far fa-play-circle" v-show="!playingMark" @click="SwitchToPlaying"></span>
+                   <span class="far fa-pause-circle" v-show="playingMark" @click="SwitchToPause"></span>
+                   <!-- 暫停、下一首 -->
+                   <span class="fas fa-step-forward" @click="NextSong"></span>
+               </div>
+           </div>
+       </div>
+   </div>
+</template>

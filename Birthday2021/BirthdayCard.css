@@ -1,0 +1,615 @@
+/*全屏設定，此設定很好用*/
+html, body{
+    height: 100%;
+    background-color: #6495ed;
+
+    /*區域內不能反白，為了drag 設定的*/
+    -webkit-user-select:none;
+    -moz-user-select:none;
+    -o-user-select:none;
+    user-select:none;
+}
+
+/**滾輪樣式**/
+::-webkit-scrollbar {
+    width: 10px;
+}
+::-webkit-scrollbar-thumb {
+    background: white;
+    border: 3px solid #646464;
+    border-radius: 100px;
+}
+::-webkit-scrollbar-track {
+    background: #646464;
+    border: 3px solid #646464;
+    border-radius: 100px;
+}
+
+
+
+/*********************************************************************************/
+/****************************  切版   ********************************************/
+/*********************************************************************************/
+
+
+#VueArea{        
+    position: relative;
+    height: 100%;
+
+    display: flex;
+    justify-content:center;/* 水平置中 */
+}
+/********** 手機本體 ***********/
+/* 手機本體*/
+#Iphone{
+    position: absolute;
+    height: 95%;
+    width: 100%;
+    min-height: 500px;
+    max-width: 300px;
+}
+/* 鏡頭、螢幕、面板 */
+#Iphone > div:nth-child(1){
+    height: 30px;
+}
+
+#Iphone > div:nth-child(2){
+    position: relative;
+    height: 85%;
+}
+
+#Iphone > div:nth-child(3){
+    /* 剩下的部分都給他，不設定高度 */
+    height:calc(100% - 85% - 30px);
+
+    display:flex;
+    justify-content:center;/* 水平置中 */
+    align-items:center;/* 垂直置中 */
+}
+/* Home 鍵*/
+.homeBtn{
+    height: 30px;
+    width: 30px;    
+}
+/********** 螢幕保護畫面 ***********/
+/* 時間 */
+.screenProtect{
+    position: absolute;
+    height:100%;
+    width: 100%;
+}
+.screenProtect > div:nth-child(1){
+    height: 40%;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:center;/* 水平置中 */
+    align-items:center;/* 垂直置中 */
+}
+.screenProtect > div:nth-child(2){
+    height: 40%;
+}
+.screenProtect > div:nth-child(3){
+    height: 20%;
+
+    display:flex;
+    justify-content:center;/* 水平置中 */
+    align-items:center;/* 垂直置中 */
+}
+
+/********** 主畫面 ***********/
+.app{
+    display: inline-block; 
+}
+
+/********** 照片 APP ***********/
+.photoApp > div:nth-child(1){
+    height: 90%;
+}
+.photoApp > div:nth-child(2){
+    height: 10%;
+}
+.photoAppScreen{
+    position: relative;
+    display:flex; 
+    justify-content:center;
+    align-items:center;
+}
+/*前一張照片*/
+.previousArrow{
+    position:absolute;
+}
+/*下一張照片*/
+.nextArrow{
+    position:absolute;
+}
+.photoAppTool{
+    display:flex; 
+    justify-content:space-around;
+    align-items:center;
+}
+
+/********** Line APP ***********/
+.lineApp > div:nth-child(1){
+    height: 90%;
+    background-color: skyblue;
+}
+.lineApp > div:nth-child(2){
+    height: 10%;
+    background-color: white;
+}
+.messageRow{
+    display:flex;
+}
+.otherMessageRow{
+    justify-content:flex-end;
+}
+.inputArea{
+    display: flex;
+    justify-content:space-around;
+    align-items:center;
+}
+/********** Camera APP ***********/
+.cameraApp> div{
+    height: 100%;
+}
+/*相機*/
+.camera> div:nth-child(1){
+    height: 80%;
+}
+.camera> div:nth-child(2){
+    height: 20%;
+    display:flex; 
+    justify-content:space-around;
+    align-items:center;
+}
+.cameraTool{
+    position: relative;
+}
+.photoList{
+    position: absolute;
+    display:flex; 
+    align-items:center;
+}
+/*相本*/
+.albumBack{
+    display:flex; 
+    align-items:center;
+}
+.album > div:nth-child(1){
+    height: 10%;
+}
+.album > div:nth-child(2){
+    height: 90%;
+    display:flex; 
+    justify-content:space-around;
+    align-items:center;
+}
+.photoInAlbum{
+    position: relative;
+    display:flex; 
+    justify-content:center;
+    align-items:center;
+}
+
+/********** Clock APP ***********/
+.clockApp > div:nth-child(1){
+    height: 60%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.clockApp > div:nth-child(2){
+    height: 40%;
+    display: flex;
+    justify-content: center;
+}
+/* 時鐘 */
+.clock{
+    position: relative;
+}
+/* 時針 */
+.hourHand{
+    position: absolute;
+}
+/* 分針 */
+.minuteHand{
+    position: absolute;
+}
+/* 秒針 */
+.secondHand{
+    position: absolute;
+}
+
+/********** Spotify APP ***********/
+/* spotify */
+.music-app{
+    position: relative;
+}
+.music-app > div:nth-child(1){
+    height: 45%;
+}
+.music-app > div:nth-child(2){
+    height: 45%;
+}
+.music-app > div:nth-child(3){
+    height: 10%;
+}
+/* 專輯大圖 */
+.album-cover-area{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+/* 專輯清單 */
+.album-information{
+    display: flex;
+    align-items:center;
+}
+/* 音樂撥放器 */
+.album-player-area > div:nth-child(1){
+    height: 20%;
+}
+.album-player-area > div:nth-child(2){
+    height: 80%;
+}
+/* 播放器 */
+.player-area > div:nth-child(1){
+    height: 10%;
+}
+.player-area > div:nth-child(2){
+    height: 90%;
+}
+.music-player{
+    display: flex;
+    align-items: center;
+}
+
+
+
+/*********************************************************************************/
+/****************************  樣式  **********************************************/
+/*********************************************************************************/
+
+
+/********** 手機本體 ***********/
+/* 手機本體*/
+#Iphone{
+    box-sizing: border-box;
+    border-radius: 30px;
+    border: 10px solid rgba(242, 242, 242, 0.35);
+    padding:5px;
+    background-color: black;
+}
+/* 鏡頭、螢幕、面板 */
+.monitor{
+    border-radius: 5px;
+    /*background-color: #595959;*/
+
+    background-image: url("./Img/snow_mountion.jpg");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+
+    overflow:hidden;
+}
+/* Home 鍵*/
+.homeBtn{
+    border-radius: 50%;
+    background-color: #404040;
+}
+.homeBtn:hover{
+    background-color: #262626;
+    cursor: pointer;
+}
+/********** 螢幕保護畫面 ***********/
+.screenProtect{
+    z-index: 100;
+    color:#ffffff;
+}
+/*時間*/
+.time{
+    font-size: 30px;
+}
+/*新訊息*/
+.newMessage{
+    box-sizing: border-box;
+    margin: 0px 5px;
+    border-radius: 10px;
+    padding:10px;
+    height: 40px;
+    color:#000000;
+    background-color: #ffffff;
+    cursor: pointer;
+}
+/* 解鎖 */
+.unluck{
+    animation-name: twinkle;
+    animation-duration:1s;
+    animation-iteration-count:infinite;
+    animation-direction:alternate;
+}
+.unluck >span:hover{
+    cursor: pointer;
+}
+/********** 主畫面 ***********/
+.app{
+    /*正方形*/
+    width:10vh;
+    height:10vh;    
+    overflow: hidden;
+    margin: 10px;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+/**********  APP 頁面 ***********/
+.appPage{
+    width: 100%;
+    height: 100%;
+}
+
+/********** 照片 APP ***********/
+.photoAppScreen{
+    background-color: #ffffff;
+}
+.photoAppScreen > img{
+    width: 100%;
+}
+/*前一張照片*/
+.previousArrow{
+    width: 15px;
+    height: 100%;
+    background-color: #000000;
+    top:0px;
+    left:0px;
+    opacity: 0.2;
+}
+.previousArrow:hover{
+    opacity: 0.6;
+}
+/*下一張照片*/
+.nextArrow{
+    width: 15px;
+    height: 100%;
+    background-color: #000000;
+    top:0px;
+    right:0px;
+    opacity: 0.2;
+}
+.nextArrow:hover{
+    opacity: 0.6;
+}
+.photoAppTool{
+    background-color: #ffffff;
+}
+/********** Line APP ***********/
+.messageDialog{
+    box-sizing: border-box;
+    background-color: #ffffff;
+    max-width: 70%;    
+    margin: 5px 5px;
+    padding: 5px 10px;
+    border-radius: 10px;
+    font-size: 10px;
+}
+.otherMessage{
+    background-color: #adff2f;
+}
+.chatArea{
+    overflow:auto;
+}
+.lineTextArea{
+    height: 70%;
+    width: 80%;
+    border:1px solid #000000;
+    resize: none;
+}
+/********** Camera APP ***********/
+.cameraScreen{
+    background-color: #262626;
+}
+.cameraVideo{
+    width: 100%; 
+    height: 100%; 
+    transform: rotateY(180deg);/*反轉 180度，不然鏡頭拍出來的畫面剛好會相反*/
+}
+.cameraTool{
+    background-color: #0d0d0d;
+}
+/* 相本的小正方形 */
+.photoList{
+    background-color: #ffffff;
+    height: 6vh;
+    width: 6vh;
+    left:10%;
+}
+/* 相本的小正方形內部的照片 */
+.newestPhoto{
+    width: 100%;
+}
+
+/* 拍照按鈕 */
+.cameraBtn{
+    background-color: #ffffff;
+    height: 5vh;
+    width: 5vh;
+    border-radius: 50%;
+    border:5px solid #666666;
+}
+.cameraBtn:hover{
+    background-color: #b3b3b3;
+}
+/*相本*/
+.albumBack{
+    background-color: #f2f2f2;
+    box-sizing: border-box;
+    padding-left: 5px;
+}
+.albumBackArrow{
+    cursor: pointer;
+}
+.photoInAlbum{
+    background-color: #ffffff;
+}
+.photoInAlbum > img{
+    width: 100%;
+}
+
+/********** Clock APP ***********/
+.clockApp{
+    background-color: #ed8f64;
+}
+.clock{
+    height: 30vh;
+    width: 30vh;
+    background-color: white;
+    border-radius: 50%;
+}
+.hourHand{
+    width: 9px;
+    height: 20%;
+    left: 50%;
+    bottom: 50%;
+    background-color: black;
+    transform-origin:50% 100%;
+}
+.minuteHand{
+    width: 6px;
+    height: 45%;
+    left: 50%;
+    bottom: 50%;
+    background-color: black;
+    transform-origin:50% 100%;
+}
+.secondHand{
+    width: 3px;
+    height: 45%;
+    left: 50%;
+    bottom: 50%;
+    background-color: red;
+    transform-origin:50% 100%;
+}
+/* 數位時鐘 */
+.digitalColck{
+    margin: 20px;
+    font-size: 30px;
+}
+
+/********** Spotify APP ***********/
+/* 進度條樣式 */
+input[type="range"]{
+    appearance: none; /* 使用系統預設的外觀 */
+    -webkit-appearance: none;
+    outline:none;
+    margin:0px;
+}
+/* 軌道 */
+input[type="range"]::-webkit-slider-runnable-track{
+    background-color: #615f5f; /* 背後*/
+    overflow: hidden;
+}
+/* 拖拉按鈕 */
+input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance: none;
+    width:2px;
+    height: 3px;
+    background-color: #69eaab;
+    box-shadow: -100vw 0 0 100vw #69eaab;
+}
+/* app 本身樣式 */
+.music-app{
+    background-color: #000000;
+    color:#ffffff;
+}
+/* 專輯大圖 */
+.album-cover-area{
+    overflow: hidden;
+    background: linear-gradient(#2b712b,#000000);
+}
+.big-album-cover{
+    width: 50%;
+    max-width: 180px;
+}
+/* 專輯清單 */
+.album-list-area{
+    overflow-y: auto;
+}
+.album-information{
+    box-sizing: border-box;
+    display: flex;
+    align-items:center;
+    margin-bottom: 5px;
+    background-color: #000000;
+    font-size: 12px;
+}
+.album-information:hover{
+    background-color: #b5966e;
+}
+.album-information > div:nth-child(1){
+    width: 20%;
+}
+/* 小技巧：靠圖片撐開整個div */
+.album-information > div:nth-child(1) > img{
+    float: left;/* 為了讓div 可以自己適應 圖片高度 */
+    width: 100%;
+}
+.album-information > div:nth-child(2){
+    width: 60%;
+    padding: 0px 0px 0px 5px;
+}
+.album-information > div:nth-child(3){
+    width: 20%;
+    text-align: center;
+}
+/* 播放中的歌 */
+.song-highlight{
+    /* background-color: burlywood; */
+    background-color: #674a25;
+}
+/* 播放器 */
+/* 進度條 */
+.progress-bar{
+    float: left;
+    cursor: pointer;
+    width: 100%;
+}
+.music-player{
+    background-color: #504e4e;
+}
+.music-player > div{
+    box-sizing: border-box;
+}
+/* 歌曲資訊 */
+.music-player > div:nth-child(1){
+    width: 55%;
+    text-align: center;
+    font-size: 8px;
+}
+/* 播放時間 */
+.music-player > div:nth-child(2){
+    width: 15%;
+    font-size: 8px;
+}
+/* 播放器工具 */
+.music-player > div:nth-child(3){
+    width: 30%;
+    display: flex;
+    justify-content:space-around;
+}
+.music-player > div:nth-child(3) > span{
+    cursor: pointer;
+}
+/****************************   動畫 ***************************************************/
+/*閃爍*/
+@keyframes twinkle { 
+    0%{
+        opacity: 0;
+    }
+    50%{
+        opacity:0.5;
+    }
+    50%{
+        opacity:1;
+    }
+}
