@@ -241,7 +241,7 @@
         var myDate = new Date();
         var myTime = myDate.toString();
         if(location.href.indexOf("http") > -1 && cvUserName!="John"){
-            db.ref("/EnterTime").push({
+            db.ref("DB01/EnterTime/").push({
                 EnterTime: myTime                   
             })
         }
