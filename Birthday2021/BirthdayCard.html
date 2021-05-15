@@ -19,6 +19,25 @@
         var cvUserName = "Fang";//使用者ID
         var myAudio = new Audio();
 
+        //目前裝置
+        //裝置判斷
+        var userAgent = navigator.userAgent;
+        var cvDevice = "";
+        if (/iPhone|iPad|iPod/i.test(userAgent)) {
+            cvDevice = "phone";
+        } else if (/Android/i.test(userAgent)) {
+            cvDevice = "phone";
+        } else if (/Windows/i.test(userAgent)) {
+            cvDevice = "computer";
+        } else if (/Mac/i.test(userAgent)) {
+            cvDevice = "computer";
+        }
+        //加上手機板的樣式
+        if(cvDevice === "phone"){
+            $('head').append('<link href="./BirthdayCard_Phone.css" rel="stylesheet" type="text/css">');
+        }
+
+        //給我自己留言的方法
         if(findGetParameter("User") != null){
             cvUserName = findGetParameter("User");
         }
@@ -266,7 +285,7 @@
                     </div>
                 </div>
                 <!-- 主頁面 -->
-                <div v-show="currentPage ==='Home'">
+                <div id="MainPage" v-show="currentPage ==='Home'">
                     <img src="./Img/Photo.png" class="app" @click="MoveTo('PhotoApp')" draggable="true" @dragStart="GetCurrentElement" @dragover="CancelDefaultEvent" @drop="DropElement"/>
                     <img src="./Img/Line.png" class="app" @click="MoveTo('LineApp')" draggable="true" @dragStart="GetCurrentElement" @dragover="CancelDefaultEvent" @drop="DropElement"/>
                     <img src="./Img/Camera.png" class="app" @click="MoveTo('CameraApp')" draggable="true" @dragStart="GetCurrentElement" @dragover="CancelDefaultEvent" @drop="DropElement"/>
@@ -613,9 +632,9 @@
                 //  分針：一秒移動 360/60/60 度
 
                 //  秒針：一秒移動 360/60 度
-                var myHourDeg = hh * (360/12) + mm * (360/12/60) + ss * (360/12/60/60);//時針
-                var myMinDeg = mm * (360/60) + ss * (360/60/60);//分針
-                var mySecDeg = ss * 360/60;//秒針
+                var myHourDeg = Math.round((hh * (360/12) + mm * (360/12/60) + ss * (360/12/60/60)) * 100)/100;//時針
+                var myMinDeg = Math.round((mm * (360/60) + ss * (360/60/60))*100)/100;//分針
+                var mySecDeg = Math.round((ss * 360/60) * 100)/100;//秒針
 
                 //轉動 [時針、分針、秒針]
                 var myHourHand = document.querySelector('.hourHand');

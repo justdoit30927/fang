@@ -38,15 +38,15 @@ html, body{
 
     display: flex;
     justify-content:center;/* 水平置中 */
+    align-items: center;
 }
 /********** 手機本體 ***********/
 /* 手機本體*/
 #Iphone{
     position: absolute;
     height: 95%;
-    width: 100%;
-    min-height: 500px;
-    max-width: 300px;
+    width: 25%;
+    min-width: 300px;
 }
 /* 鏡頭、螢幕、面板 */
 #Iphone > div:nth-child(1){
@@ -68,8 +68,8 @@ html, body{
 }
 /* Home 鍵*/
 .homeBtn{
-    height: 30px;
-    width: 30px;    
+    height: 5vh;
+    width: 5vh;    
 }
 /********** 螢幕保護畫面 ***********/
 /* 時間 */
@@ -99,7 +99,7 @@ html, body{
 
 /********** 主畫面 ***********/
 .app{
-    display: inline-block; 
+    /* display: inline-block;  */
 }
 
 /********** 照片 APP ***********/
@@ -317,10 +317,10 @@ html, body{
     margin: 0px 5px;
     border-radius: 10px;
     padding:10px;
-    height: 40px;
     color:#000000;
     background-color: #ffffff;
     cursor: pointer;
+    font-size: 20px;
 }
 /* 解鎖 */
 .unluck{
@@ -529,7 +529,6 @@ input[type="range"]::-webkit-slider-thumb{
 }
 .big-album-cover{
     width: 50%;
-    max-width: 180px;
 }
 /* 專輯清單 */
 .album-list-area{

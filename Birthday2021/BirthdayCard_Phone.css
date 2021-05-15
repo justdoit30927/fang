@@ -1,0 +1,70 @@
+/********** 手機本體 + 首頁 ***********/
+#Iphone{
+    height: 90%;
+    width: 90%;
+}
+
+/* 鏡頭、螢幕、面板 */
+#Iphone > div:nth-child(1){
+    height: 100px;
+}
+
+#Iphone > div:nth-child(2){
+    position: relative;
+    height: 85%;
+}
+
+#Iphone > div:nth-child(3){
+    /* 剩下的部分都給他，不設定高度 */
+    height:calc(100% - 85% - 100px);
+
+    display:flex;
+    justify-content:center;/* 水平置中 */
+    align-items:center;/* 垂直置中 */
+}
+
+#Iphone{
+    font-size: 50px;
+}
+
+/*時間*/
+.time{
+    font-size: 80px;
+}
+
+/*新訊息*/
+.newMessage{
+    font-size: 50px;
+}
+/********** 照片 APP ***********/
+/*前一張照片*/
+.previousArrow{
+    width: 30px;
+}
+/*下一張照片*/
+.nextArrow{
+    width: 30px;
+}
+
+/********** Line APP ***********/
+.messageDialog{
+    font-size: 40px;
+}
+/********** Clock APP ***********/
+/* 數位時鐘 */
+.digitalColck{
+    margin: 20px;
+    font-size: 80px;
+}
+/********** Spotify APP ***********/
+.album-information{
+    font-size: 35px;
+}
+/* 歌曲資訊 */
+.music-player > div:nth-child(1){
+    font-size: 35px;
+}
+/* 播放時間 */
+.music-player > div:nth-child(2){
+    font-size: 35px;
+}
